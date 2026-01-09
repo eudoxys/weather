@@ -172,12 +172,12 @@ class Weather(pd.DataFrame):
                         },
                     index=pd.to_datetime(_nsrdb["time_index"][...].astype(str)),
                     ).resample("1h").mean().round(1)
-                print(pd.DataFrame({
-                    "mean":data.mean(),
-                    "min":data.min(),
-                    "max":data.max(),
-                    "std":data.std(),
-                    }).round(1))
+                # print(pd.DataFrame({
+                #     "mean":data.mean(),
+                #     "min":data.min(),
+                #     "max":data.max(),
+                #     "std":data.std(),
+                #     }).round(1))
                 data.air_temperature = data.air_temperature * 1.8 + 32
                 data.columns = [
                     "temperature_degF",
@@ -222,13 +222,13 @@ if __name__ == '__main__':
         print("Processing",state,county,end="...",flush=True)
         try:
             print("ok")
-            values = Weather(state,county,refresh=True,year=2020)
-            # print(pd.DataFrame({
-            #     "Mean":values.mean().T,
-            #     "Min":values.min().T,
-            #     "Max":values.max().T,
-            #     "Stdev":values.std().T,
-            #     }))
+            values = Weather(state,county,refresh=False,year=2020)
+            print(pd.DataFrame({
+                "Mean":values.mean().T,
+                "Min":values.min().T,
+                "Max":values.max().T,
+                "Stdev":values.std().T,
+                }))
         except Exception as err:
             raise
 
