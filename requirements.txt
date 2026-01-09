@@ -1,0 +1,9 @@
+pandas
+requests
+pytz
+matplotlib
+marimo
+h5pyd
+scipy
+fips @ git+https://github.com/eudoxys/fips
+cache @ git+https://github.com/eudoxys/cache
