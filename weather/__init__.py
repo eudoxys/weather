@@ -14,19 +14,19 @@
 
 # Options
   
-  `-h|--help`: show this help message and exit
+  - `-h|--help`: show this help message and exit
   
-  `-S|--state STATE`: state abbreviation of county
+  - `-S|--state STATE`: state abbreviation of county
   
-  `-C|--county COUNTY`: county name of weather data to collect
+  - `-C|--county COUNTY`: county name of weather data to collect
   
-  `-Y|--year YEAR`: year of weather data to collect
+  - `-Y|--year YEAR`: year of weather data to collect
   
-  `-o|--output OUTPUT`: output file name
+  - `-o|--output OUTPUT`: output file name
 
-  `-w|--warning`: enable warning messages from python
+  - `-w|--warning`: enable warning messages from python
 
-  `-d|--debug`: enable debug traceback on exceptions
+  - `-d|--debug`: enable debug traceback on exceptions
 
 # Description
 
