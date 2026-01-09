@@ -162,8 +162,10 @@ def main(*args:list[str],**kwargs:dict[str,str]) -> int:
 
                 if args.output is None:
 
-                    plt.show()
-                    return E_OK
+                    try:
+                        plt.show()
+                    except KeyboardInterrupt:
+                        return E_OK
 
                 else:
 
