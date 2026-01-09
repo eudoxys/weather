@@ -12,7 +12,7 @@ See https://www.eudoxys.com/weather
 
 ## Command line
 
-Get the Alameda county California reference weather data
+Get the Alameda County CA reference weather data
 
     loads print -S=CA -C=Alameda
 
