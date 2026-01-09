@@ -29,12 +29,26 @@ which outputs the following
 
 To get the actual weather data for Alameda County CA in 2020 use the command
 
-    from loads.weather import Weather
-    Weather("CA","Alameda",2020)
+    from weather import Weather
+    Weather("CA","Alameda")
 
 which outputs the following
 
-    (TODO)
+                               temperature_degF  humidity_pc  global_Wpms  direct_Wpms  diffuse_Wpms
+    timestamp                                                                                       
+    2018-01-01 00:00:00+00:00              54.0         23.4         40.5         63.0          32.0
+    2018-01-01 01:00:00+00:00              52.0         26.3          2.0         12.0           2.0
+    2018-01-01 02:00:00+00:00              51.1         28.6          0.0          0.0           0.0
+    2018-01-01 03:00:00+00:00              51.1         24.7          0.0          0.0           0.0
+    2018-01-01 04:00:00+00:00              51.1         26.0          0.0          0.0           0.0
+    ...                                     ...          ...          ...          ...           ...
+    2018-12-31 19:00:00+00:00              57.0         23.0        495.5        943.0          58.0
+    2018-12-31 20:00:00+00:00              57.9         21.2        523.5        951.0          61.5
+    2018-12-31 21:00:00+00:00              57.9         21.2        489.5        927.0          63.5
+    2018-12-31 22:00:00+00:00              57.9         20.3        397.5        880.0          58.5
+    2018-12-31 23:00:00+00:00              57.0         20.9        254.0        746.0          52.0
+
+    [8760 rows x 5 columns]
 """
 
 import os
@@ -63,8 +77,10 @@ class Weather(pd.DataFrame):
         "https://oedi-data-lake.s3.amazonaws.com/nrel-pds-building-stock/"\
         "end-use-load-profiles-for-us-building-stock/2021/comstock_amy2018_release_1/"\
         "weather/amy2018"
+    """Source for reference weather when no year is provided"""
 
     ACTUAL_SOURCE = "/nrel/nsrdb/GOES/aggregated/v4.0.0/nsrdb_{year}.h5"
+    """Source for actual weather when a year is provided"""
 
     def __init__(self,
         state:str,

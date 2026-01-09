@@ -1,39 +1,4 @@
-"""Weather accessor CLI
-
-# Syntax
-    
-    weather [-h] [-S STATE] [-C COUNTY] [-Y YEAR] [-o OUTPUT] [-w] [-d] {viewer,print,plot}
-
-# Commands
-
-  - `viewer`: open Marimo notebook
-
-  - `print`: output data
-  
-  - `plot`: output plot
-
-# Options
-  
-  `-h|--help`: show this help message and exit
-  
-  `-S|--state STATE`: state abbreviation of county
-  
-  `-C|--county COUNTY`: county name of weather data to collect
-  
-  `-Y|--year YEAR`: year of weather data to collect
-  
-  `-o|--output OUTPUT`: output file name
-
-  `-w|--warning`: enable warning messages from python
-
-  `-d|--debug`: enable debug traceback on exceptions
-
-# Description
-
-Weather data command-line interface.
-
-See https://www.eudoxys.com/weather for documentation.
-"""
+"""Weather accessor CLI"""
 
 import os
 import sys
