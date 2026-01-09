@@ -54,10 +54,14 @@ which outputs the following
 import os
 import datetime as dt
 import pytz
+import json
+
 import pandas as pd
-import h5pyd as h5
+# import h5pyd as h5
 import numpy as np
 from scipy.spatial import cKDTree
+import pvlib
+
 from cache import Cache
 from fips.counties import County
 from fips.states import State
@@ -66,6 +70,71 @@ _nsrdb = None
 _nsrdb_meta = None
 _version = 0 # cache schema version
 
+def nsrdb_credentials(path=os.path.join(os.environ["HOME"],".nsrdb","credentials.json")):
+    """Read NSRDB credentials"""
+    with open(path,"r") as fh:
+        return list(json.load(fh).items())[0]
+        
+def nsrdb_weather(lat,lon,year,
+                  interval=30,
+                  attributes={"ghi" : "ghi",
+                              "temp_air" : "air_temperature",
+                              "wind_speed" : "wind_speed",
+                              'dhi': 'dhi',
+                              'dni': 'dni',
+                              'wind_direction': 'wind_direction',
+                              'dew_point': 'dew_point',
+                              'relative_humidity': 'relative_humidity',
+                              'total_precipitable_water': 'total_precipitable_water'
+                              }):
+    """
+    Pull NSRDB data for a particular year and location. 
+    
+    Parameters
+    ----------
+    location: Str.
+        Geohash of a particular location that will be decoded to get lat-long
+        coordinates.
+    year: Int.
+        Year of data we want to pull data for.
+    interval: Int.
+        Frequency of data in minutes. Default 5
+    attributes: Dictionary of string keys/values.
+        Desired data fields to return as values, and final column names as keys.
+        See pvlib documentaton for the full list of fields in NSRDB:
+        https://pvlib-python.readthedocs.io/en/v0.9.0/generated/pvlib.iotools.get_psm3.html
+    
+    Returns
+    -------
+    Pandas dataframe containing 'attribute' fields, with UTC ISO format
+    datetime index.
+    """
+    leap = (year%4 == 0)
+    email, api_key = nsrdb_credentials()
+    # Pull from API and save locally
+    psm4, _= pvlib.iotools.get_nsrdb_psm4_aggregated(
+        lat,
+        lon,
+        api_key,
+        email,
+        year=year,
+        time_step=interval, 
+        parameters=["ghi", "dni", "dhi", "temp_air", 
+                    "wind_speed", 'wind_direction',
+                    'dew_point', 'relative_humidity', 
+                    'total_precipitable_water'], # Example parameters
+        utc=True, # Set to True for UTC timestamps
+        map_variables=True # Renames columns to pvlib standard names
+    )
+    cols_to_remove = ['Year', 'Month', 'Day', 'Hour', 'Minute']
+    psm4 = psm4.drop(columns=cols_to_remove)
+    psm4.index = pd.to_datetime(psm4.index)
+    psm4.rename(columns={"key_0": "datetime",
+                         **{v: k for k, v in attributes.items()}},
+                inplace=True)
+    psm4 = psm4.round(3)  
+    return psm4.sort_index()
+         
 class Weather(pd.DataFrame):
     """Weather data frame implementation"""
 
@@ -103,13 +172,29 @@ class Weather(pd.DataFrame):
 
         if self.CACHEDIR:
             Cache.CACHEDIR = self.CACHEDIR
-        cache = Cache([state,county,"W.csv.gz" if year is None else f"W_{year}.csv"],
+        cache = Cache([state,county,"W.csv.gz" if year is None else f"W_{year}.csv.gz"],
             package="weather",
             version=_version)
 
-        # download data and save to cache
-        if not cache.exists() or refresh:
+        # read from cache
+        if cache.exists() and not refresh:
 
+            # load from cache
+            try:
+                data = pd.read_csv(cache.pathname,
+                    index_col=["timestamp"],
+                    parse_dates=["timestamp"],
+                    )
+            except:
+
+                data = None
+
+        else:
+
+            data = None
+
+        # download data and save to cache
+        if data is None:
             fips = County(ST=state,COUNTY=county).FIPS
             tzoffset = float(State(ST=state).TZOFFSET)
             if year is None:
@@ -138,68 +223,30 @@ class Weather(pd.DataFrame):
                 data.index = pd.DatetimeIndex([str(x).replace("2019","2018") for x in data.index])
                 data.index.name = "timestamp"
                 data.sort_index(inplace=True)
+
             else:
 
-                global _nsrdb
-                if _nsrdb is None:
-                    _nsrdb = h5.File(self.ACTUAL_SOURCE.format(year=year))
-                try:
-                    dataset_coords = _nsrdb['coordinates'][...]
-                except Exception:
-                    global _nsrdb_meta
-                    if _nsrdb_meta is None:
-                        metacache = Cache("metadata.csv.gz",package="weather",version=_version)
-                        if metacache.exists():
-                            _nsrdb_meta = pd.read_csv(metacache.pathname)
-                        else:
-                            _nsrdb_meta = pd.DataFrame(_nsrdb['meta'][...]).set_index("country").loc[b"United States"].set_index(["state","county"]).sort_index()
-                            _nsrdb_meta.to_csv(metacache.pathname,index=True,header=True,compression="gzip")
-                    dataset_coords = _nsrdb_meta[['latitude', 'longitude']].values
-
-                tree = cKDTree(dataset_coords)
-                def nearest(lat_coord, lon_coord):
-                    lat_lon = np.array([lat_coord, lon_coord])
-                    dist, pos = tree.query(lat_lon)
-                    return pos
-
                 latlon = Counties(use_index=["ST","COUNTY"]).loc[state,county][["LAT","LON"]].values.tolist()[0]
-                latlon_idx = nearest(*latlon)
-
-                data = pd.DataFrame(
-                    data={
-                        x:_nsrdb[x][:,latlon_idx] / _nsrdb[x].attrs['psm_scale_factor']
-                        for x in ["air_temperature","relative_humidity","ghi","dni","dhi"]
-                        },
-                    index=pd.to_datetime(_nsrdb["time_index"][...].astype(str)),
-                    ).resample("1h").mean().round(1)
-                # print(pd.DataFrame({
-                #     "mean":data.mean(),
-                #     "min":data.min(),
-                #     "max":data.max(),
-                #     "std":data.std(),
-                #     }).round(1))
-                data.air_temperature = data.air_temperature * 1.8 + 32
-                data.columns = [
-                    "temperature_degF",
-                    "humidity_pc",
-                    "global_Wpms",
-                    "direct_Wpms",
-                    "diffuse_Wpms",
-                    ]
+                data = nsrdb_weather(*latlon, year, interval=60)
+                columns = {
+                    "temp_air":"temperature_degF",
+                    "relative_humidity":"humidity_pc",
+                    "ghi":"global_Wpsm",
+                    "dni":"direct_Wpsm",
+                    "dhi":"diffuse_Wpsm",
+                }
+                data.drop(set(data.columns)-set(columns),inplace=True,axis=1)
+                data.rename(columns,inplace=True,axis=1)
+                data.temperature_degF = data.temperature_degF * 1.8 + 32
+                data = data[columns.values()].round(1)
                 data.index.name = "timestamp"
+                data.index = data.index - dt.timedelta(minutes=30)
+                # print(data)
 
             data.to_csv(cache.pathname,
                 index=True,
                 header=True,
                 compression="gzip" if cache.name.endswith(".gz") else None,
-                )
-
-        else:
-
-            # load from cache
-            data = pd.read_csv(cache.pathname,
-                index_col=["timestamp"],
-                parse_dates=["timestamp"],
                 )
 
         # move year-end data to beginning
@@ -222,13 +269,16 @@ if __name__ == '__main__':
         print("Processing",state,county,end="...",flush=True)
         try:
             print("ok")
-            values = Weather(state,county,refresh=False,year=2020)
-            print(pd.DataFrame({
-                "Mean":values.mean().T,
-                "Min":values.min().T,
-                "Max":values.max().T,
-                "Stdev":values.std().T,
-                }))
+            for year in [None,2018,2019,2020,2021,2022]:
+                values = Weather(state,county,refresh=False,year=year)
+                print(f"{state} {county} {year=}")
+                # print(values)
+                print(pd.DataFrame({
+                    "Mean":values.mean().T,
+                    "Min":values.min().T,
+                    "Max":values.max().T,
+                    "Stdev":values.std().T,
+                    }).round(1))
         except Exception as err:
             raise
 
