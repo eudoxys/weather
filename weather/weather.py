@@ -1,6 +1,6 @@
 """Weather data accessor
 
-Access the weather corresponding to the load data.
+Access the RESstock/COMstock or NSRB weather data for US.
 
 # Example
 
