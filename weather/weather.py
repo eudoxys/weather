@@ -71,7 +71,7 @@ class Weather(pd.DataFrame):
 
     # pylint: disable=invalid-name
     CACHEDIR = None
-    """Cache folder path (`None` is '{packagedir}/.cache')"""
+    """Cache folder path (`None` is default cache folder)"""
 
     REFERENCE_SOURCE = \
         "https://oedi-data-lake.s3.amazonaws.com/nrel-pds-building-stock/"\
