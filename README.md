@@ -32,7 +32,7 @@ Outputs
 
 ## Python code
 
-Get the weather data frame Alameda County CA.
+Get the reference weather data frame Alameda County CA.
 
     from weather import Weather
     Weather(state="CA",county="Alameda")
