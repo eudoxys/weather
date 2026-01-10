@@ -3,37 +3,43 @@
 Syntax
 ------
     
-    weather [-h] [-S STATE] [-C COUNTY] [-Y YEAR] [-o OUTPUT] [-w] [-d] {viewer,print,plot}
+    weather [-S STATE] [-C COUNTY] [-Y YEAR]
+            [-d] [-h] [-w] [-o OUTPUT]
+            {viewer,print,plot}
 
 Commands
 --------
 
-  - `viewer`: open Marimo notebook
+  - `help`: open online documentation
+
+  - `info`: get package URLs for source code, documentation, issues and
+    license.
+
+  - `plot`: output plot
 
   - `print`: output data
-  
-  - `plot`: output plot
 
   - `register`: open the NSRDB registration form
 
-  - `help`: open online documentation
+  - `viewer`: open Marimo notebook
 
 Options
 -------
   
-  - `-h|--help`: show this help message and exit
-  
-  - `-S|--state STATE`: state abbreviation of county
-  
   - `-C|--county COUNTY`: county name of weather data to collect
   
-  - `-Y|--year YEAR`: year of weather data to collect
+  - `-d|--debug`: enable debug traceback on exceptions
+
+  - `-h|--help`: show this help message and exit
   
   - `-o|--output OUTPUT`: output file name
 
+  - `-S|--state STATE`: state abbreviation of county
+  
   - `-w|--warning`: enable warning messages from python
 
-  - `-d|--debug`: enable debug traceback on exceptions
+  - `-Y|--year YEAR`: year of weather data to collect
+  
 
 Description
 -----------
