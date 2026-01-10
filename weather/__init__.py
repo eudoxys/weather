@@ -47,6 +47,24 @@ Description
 The `weather` package provides access to RESstock/COMstock reference weather
 and NSRDB actual weather.
 
+The following weather data are obtained:
+
+  - `temperature_degF`: the outdoor air temperature in degrees Fahrenheit,
+
+  - `humidity_pc`: the relative humidity in %,
+
+  - `global_Wpms`: the global horizontal solar irradiance in Watts per square meter,
+
+  - `direct_Wpms`: the direct normal solar irradiance in Watts per square meter, and
+
+  - `diffuse_Wpms`: the global diffuse solar irradiance in Watts per square meter.
+
+The time index is provided in UTC. A year is defined as starting January 1 at
+midnight UTC and ending December 31 at 23:59:59 UTC regardless of the local
+timezone.  Weather data is provided in hourly time-steps and rounded to 1
+decimal place. Leap years have 8784 hours of data and non-leap years have
+8760 hours of data.
+
 Example
 -------
 
