@@ -168,6 +168,31 @@ timestamp
 2018-12-31 23:00:00+00:00              57.0         20.9        254.0        746.0          52.0
 </code></pre>
 
+<p>To access the same weather data using Python, use the command</p>
+
+<pre><code>from weather import Weather
+Weather("CA","Alameda")
+</code></pre>
+
+<p>which outputs the following</p>
+
+<pre><code>                           temperature_degF  humidity_pc  global_Wpms  direct_Wpms  diffuse_Wpms
+timestamp                                                                                       
+2018-01-01 00:00:00+00:00              54.0         23.4         40.5         63.0          32.0
+2018-01-01 01:00:00+00:00              52.0         26.3          2.0         12.0           2.0
+2018-01-01 02:00:00+00:00              51.1         28.6          0.0          0.0           0.0
+2018-01-01 03:00:00+00:00              51.1         24.7          0.0          0.0           0.0
+2018-01-01 04:00:00+00:00              51.1         26.0          0.0          0.0           0.0
+...                                     ...          ...          ...          ...           ...
+2018-12-31 19:00:00+00:00              57.0         23.0        495.5        943.0          58.0
+2018-12-31 20:00:00+00:00              57.9         21.2        523.5        951.0          61.5
+2018-12-31 21:00:00+00:00              57.9         21.2        489.5        927.0          63.5
+2018-12-31 22:00:00+00:00              57.9         20.3        397.5        880.0          58.5
+2018-12-31 23:00:00+00:00              57.0         20.9        254.0        746.0          52.0
+
+[8760 rows x 5 columns]
+</code></pre>
+
 <h2 id="package-information">Package information</h2>
 
 <ul>
@@ -270,20 +295,43 @@ timestamp
 </span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a><span class="sd">    2018-12-31 22:00:00+00:00              57.9         20.3        397.5        880.0          58.5</span>
 </span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a><span class="sd">    2018-12-31 23:00:00+00:00              57.0         20.9        254.0        746.0          52.0</span>
 </span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>
-</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a><span class="sd">Package information</span>
-</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a><span class="sd">-------------------</span>
-</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>
-</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a><span class="sd">- Source code: https://github.com/eudoxys/weather</span>
+</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a><span class="sd">To access the same weather data using Python, use the command</span>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>
+</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a><span class="sd">    from weather import Weather</span>
+</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a><span class="sd">    Weather(&quot;CA&quot;,&quot;Alameda&quot;)</span>
 </span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>
-</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a><span class="sd">- Documentation: https://www.eudoxys.com/weather</span>
+</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a><span class="sd">which outputs the following</span>
 </span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>
-</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a><span class="sd">- Issues: https://github.com/eudoxys/weather/issues</span>
-</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>
-</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a><span class="sd">- License: https://github.com/eudoxys/weather/blob/main/LICENSE</span>
-</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>
-</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">.weather</span><span class="w"> </span><span class="kn">import</span> <span class="n">Weather</span>
-</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">.cli</span><span class="w"> </span><span class="kn">import</span> <span class="n">main</span>
+</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a><span class="sd">                               temperature_degF  humidity_pc  global_Wpms  direct_Wpms  diffuse_Wpms</span>
+</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a><span class="sd">    timestamp                                                                                       </span>
+</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a><span class="sd">    2018-01-01 00:00:00+00:00              54.0         23.4         40.5         63.0          32.0</span>
+</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a><span class="sd">    2018-01-01 01:00:00+00:00              52.0         26.3          2.0         12.0           2.0</span>
+</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a><span class="sd">    2018-01-01 02:00:00+00:00              51.1         28.6          0.0          0.0           0.0</span>
+</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a><span class="sd">    2018-01-01 03:00:00+00:00              51.1         24.7          0.0          0.0           0.0</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a><span class="sd">    2018-01-01 04:00:00+00:00              51.1         26.0          0.0          0.0           0.0</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a><span class="sd">    ...                                     ...          ...          ...          ...           ...</span>
+</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a><span class="sd">    2018-12-31 19:00:00+00:00              57.0         23.0        495.5        943.0          58.0</span>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a><span class="sd">    2018-12-31 20:00:00+00:00              57.9         21.2        523.5        951.0          61.5</span>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a><span class="sd">    2018-12-31 21:00:00+00:00              57.9         21.2        489.5        927.0          63.5</span>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a><span class="sd">    2018-12-31 22:00:00+00:00              57.9         20.3        397.5        880.0          58.5</span>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a><span class="sd">    2018-12-31 23:00:00+00:00              57.0         20.9        254.0        746.0          52.0</span>
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a><span class="sd">    [8760 rows x 5 columns]</span>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>
+</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a><span class="sd">Package information</span>
+</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a><span class="sd">-------------------</span>
+</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>
+</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a><span class="sd">- Source code: https://github.com/eudoxys/weather</span>
+</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>
+</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a><span class="sd">- Documentation: https://www.eudoxys.com/weather</span>
+</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>
+</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a><span class="sd">- Issues: https://github.com/eudoxys/weather/issues</span>
+</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>
+</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a><span class="sd">- License: https://github.com/eudoxys/weather/blob/main/LICENSE</span>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>
+</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">.weather</span><span class="w"> </span><span class="kn">import</span> <span class="n">Weather</span>
+</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">.cli</span><span class="w"> </span><span class="kn">import</span> <span class="n">main</span>
 </span></pre></div>
 
 
