@@ -5,7 +5,7 @@ Syntax
     
     weather [-S STATE] [-C COUNTY] [-Y YEAR]
             [-d] [-h] [-w] [-o OUTPUT]
-            {viewer,print,plot}
+            {help,info,plot,print,register,viewer}
 
 Commands
 --------
