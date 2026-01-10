@@ -1,10 +1,12 @@
 """Weather data accessor
 
-# Syntax
+Syntax
+------
     
     weather [-h] [-S STATE] [-C COUNTY] [-Y YEAR] [-o OUTPUT] [-w] [-d] {viewer,print,plot}
 
-# Commands
+Commands
+--------
 
   - `viewer`: open Marimo notebook
 
@@ -12,7 +14,12 @@
   
   - `plot`: output plot
 
-# Options
+  - `register`: open the NSRDB registration form
+
+  - `help`: open online documentation
+
+Options
+-------
   
   - `-h|--help`: show this help message and exit
   
@@ -28,12 +35,14 @@
 
   - `-d|--debug`: enable debug traceback on exceptions
 
-# Description
+Description
+-----------
 
 The `weather` package provides access to RESstock/COMstock reference weather
 and NSRDB actual weather.
 
-# Example
+Example
+-------
 
 To print the reference weather for Alameda County CA use the command
 
@@ -53,7 +62,8 @@ which outputs the following
     2018-12-31 22:00:00+00:00              57.9         20.3        397.5        880.0          58.5
     2018-12-31 23:00:00+00:00              57.0         20.9        254.0        746.0          52.0
 
-# Package information
+Package information
+-------------------
 
 - Source code: https://github.com/eudoxys/weather
 

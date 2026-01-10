@@ -4,11 +4,13 @@ import os
 import sys
 import argparse
 import warnings
+import webbrowser
+import importlib.metadata as meta
 
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from weather import Weather
+import weather
 
 E_OK = 0
 """Exit code on success"""
@@ -19,14 +21,18 @@ E_FAILED = 1
 E_SYNTAX = 2
 """Exit code on syntax error"""
 
+_URLS = dict(x.split(", ") for x in meta.metadata(__package__).get_all("Project-URL"))
+
 def main(*args:list[str],**kwargs:dict[str,str]) -> int:
     """Weather data command line processor
 
-    # Argument
+    Argument
+    --------
 
     - `*args`: command line arguments (`None` is `sys.argv`)
 
-    # Returns
+    Returns
+    -------
 
     - `int`: return/exit code
     """
@@ -46,7 +52,7 @@ def main(*args:list[str],**kwargs:dict[str,str]) -> int:
             )
 
         parser.add_argument("command",
-            choices={"print","plot","viewer"},
+            choices={"print","plot","viewer","register","help","info"},
             help="Weather command")
 
         parser.add_argument("-S","--state",
@@ -86,7 +92,7 @@ def main(*args:list[str],**kwargs:dict[str,str]) -> int:
         if args.command in {"print","plot"}:
             assert not args.state is None, f"state is required"
             assert not args.county is None, f"county is required"
-            data = Weather(args.state,args.county,args.year)
+            data = weather.Weather(args.state,args.county,args.year)
 
         match args.command:
             
@@ -140,6 +146,21 @@ def main(*args:list[str],**kwargs:dict[str,str]) -> int:
             case "viewer":
 
                 return os.system(f"marimo run {os.path.dirname(__file__)}/viewer.py")
+
+            case "register":
+
+                webbrowser.open(weather.SIGNUP)
+                print("Please fill out the form in the new browser window to register with the NSRDB Developer Network")
+                print(f"You should store your credentials in the file {weather.CREDENTIALS}")
+                return E_OK
+
+            case "help":
+                webbrowser.open(_URLS["Documentation"])
+                return E_OK
+
+            case "info":
+                print(*[f"{x}: {y}" for x,y in _URLS.items()],sep="\n")
+                return E_OK
 
     # pylint: disable=broad-exception-caught
     except Exception as err:
