@@ -11,22 +11,47 @@ def _(county_ui, data_ui, mo, month_ui, state_ui, year_ui):
 
 
 @app.cell
-def _(county_ui, data_ui, month_ui, np, pd, plt, state_ui, weather, year_ui):
-    plt.figure(figsize=(20,10))
+def _(
+    county_ui,
+    data_ui,
+    mo,
+    month_ui,
+    np,
+    pd,
+    plt,
+    state_ui,
+    weather,
+    year_ui,
+):
+    _data = weather[data_ui.value]
+    _year = year_ui.value if year_ui.value else 2018
+    _month = month_ui.value
+    plt.figure(figsize=(20, 10))
     plt.grid()
-    if month_ui.value:
+    if _month:
         dt_index = pd.date_range(
-            start=f"{year_ui.value}-{month_ui.value:02d}-01 00:00:00+00:00",
-            end=f"{year_ui.value+1 if month_ui.value==12 else year_ui.value}-{month_ui.value+1 if month_ui.value<12 else 1:02d}-01 00:00:00+00:00",
-            freq="30min",
+            start=f"{_year}-{_month:02d}-01 00:00:00+00:00",
+            end=f"{_year+1 if _month==12 else _year}-{_month+1 if _month<12 else 1:02d}-01 00:00:00+00:00",
+            freq="1h",
         )[:-1]
-        plt.plot(weather.loc[np.s_[dt_index]])
+        plt.plot(_data.loc[np.s_[dt_index]])
     else:
-        plt.plot(weather)
+        plt.plot(_data)
     plt.title(f"{county_ui.value} {state_ui.value}")
     plt.xlabel("Date/Time")
     plt.ylabel(data_ui.selected_key)
-    plt.gca()
+    mo.ui.tabs(
+        {
+            "Plot": plt.gca(),
+            "Data": mo.ui.table(
+                weather,
+                selection=None,
+                page_size=24,
+                text_justify_columns={x:"right" for x in weather.columns}
+            ),
+        },
+        lazy=True,
+    )
     return
 
 
@@ -60,74 +85,20 @@ def _(dt, mo):
 @app.cell
 def _(mo):
     data_ui = mo.ui.dropdown(label="Data:",options={
-        "Temperature (degF)": "/air_temperature",
-        "Global horizontal irradiance (W/m^2)": "/ghi",
-        "Diffuse horizontal irradiance (W/m^2)": "/dhi",
-        "Direct normal irradiance (W/m^2)": "/dni",
+        "Temperature (degF)": "temperature_degF",
+        "Humidity (%)": "humidity_pc",
+        "Global horizontal irradiance (W/m^2)": "global_Wpms",
+        "Diffuse horizontal irradiance (W/m^2)": "diffuse_Wpms",
+        "Direct normal irradiance (W/m^2)": "direct_Wpms",
     },value="Temperature (degF)")
     return (data_ui,)
 
 
 @app.cell
-def _(county_ui, mo, state_ui, year_ui):
+def _(Weather, county_ui, mo, state_ui, year_ui):
     mo.stop(state_ui.value is None, mo.md("**<font color=blue>HINT**: select a state</font>"))
     mo.stop(county_ui.value is None, mo.md("**<font color=blue>HINT**: select a county</font>"))
-    mo.stop(year_ui.value is None, mo.md("**<font color=blue>HINT**: select a year</font>"))
-    return
-
-
-@app.cell
-def _(h5, year_ui):
-    data = h5.File(f"/nrel/nsrdb/GOES/aggregated/v4.0.0/nsrdb_{year_ui.value}.h5")
-    return (data,)
-
-
-@app.cell
-def _(data, mo, pd):
-    try:
-        dataset_coords = data["coordinates"][...]
-    except Exception:
-        # fall back to meta which includes 'latitude' and 'longitude' columns
-        with mo.status.spinner(title="Loading NSRDB metadata...") as _spinner:
-            meta = (
-                pd.DataFrame(data["meta"][...])
-                .set_index("country")
-                .loc[b"United States"]
-                .set_index(["state", "county"])
-                .sort_index()
-            )
-            dataset_coords = meta[["latitude", "longitude"]].values
-    return (dataset_coords,)
-
-
-@app.cell
-def _(cKDTree, dataset_coords, np):
-    tree = cKDTree(dataset_coords)
-    def nearest(lat_coord, lon_coord):
-        lat_lon = np.array([lat_coord, lon_coord])
-        dist, pos = tree.query(lat_lon)
-        return pos
-    return (nearest,)
-
-
-@app.cell
-def _(Counties, county_ui, nearest, state_ui):
-    latlon = Counties(use_index=["ST","COUNTY"]).loc[state_ui.value,county_ui.value][["LAT","LON"]].values.tolist()[0]
-    latlon_idx = nearest(*latlon)
-    return (latlon_idx,)
-
-
-@app.cell
-def _(data, data_ui, latlon_idx, pd):
-    values = data[data_ui.value]
-    value_scale = values.attrs["psm_scale_factor"]
-    print(f"{data_ui.value} scale is {value_scale}")
-    time_index = pd.to_datetime(data["time_index"][...].astype(str))
-    weather = pd.DataFrame(
-        data=(values[:,latlon_idx] / value_scale * 1.8) + 32,
-        index=time_index,
-    )
-    # weather
+    weather = Weather(state_ui.value,county_ui.value,year_ui.value)
     return (weather,)
 
 
@@ -139,9 +110,9 @@ def _():
     import numpy as np
     import datetime as dt
     import matplotlib.pyplot as plt
-    from scipy.spatial import cKDTree
-    from fips.counties import Counties
-    return Counties, cKDTree, dt, h5, mo, np, pd, plt
+    from fips import Counties
+    from weather import Weather
+    return Counties, Weather, dt, mo, np, pd, plt
 
 
 if __name__ == "__main__":

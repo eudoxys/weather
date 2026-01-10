@@ -79,20 +79,20 @@ from scipy.spatial import cKDTree
 import pvlib
 
 from cache import Cache
-from fips.counties import County
+from fips.counties import Counties, County
 from fips.states import State
 
 _nsrdb = None
 _nsrdb_meta = None
 _version = 0 # cache schema version
 
-CREDENTIALS = os.path.join(os.environ["HOME"],".nsrdb","credentials.json")
+CREDENTIALS = "{HOME}/.nsrdb/credentials.json"
 """Location of credentials file"""
 
 SIGNUP = "https://developer.nrel.gov/signup/"
 """URL of NSRDB Developer Network sign-up form"""
 
-def nsrdb_credentials(path=CREDENTIALS):
+def nsrdb_credentials(path=CREDENTIALS.format(HOME=os.environ["HOME"])):
     """@private 
     Read NSRDB credentials
 
@@ -282,9 +282,9 @@ class Weather(pd.DataFrame):
                 columns = {
                     "temp_air":"temperature_degF",
                     "relative_humidity":"humidity_pc",
-                    "ghi":"global_Wpsm",
-                    "dni":"direct_Wpsm",
-                    "dhi":"diffuse_Wpsm",
+                    "ghi":"global_Wpms",
+                    "dni":"direct_Wpms",
+                    "dhi":"diffuse_Wpms",
                 }
                 data.drop(set(data.columns)-set(columns),inplace=True,axis=1)
                 data.rename(columns,inplace=True,axis=1)

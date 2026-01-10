@@ -151,7 +151,7 @@ def main(*args:list[str],**kwargs:dict[str,str]) -> int:
 
                 webbrowser.open(weather.SIGNUP)
                 print("Please fill out the form in the new browser window to register with the NSRDB Developer Network")
-                print(f"You should store your credentials in the file {weather.CREDENTIALS}")
+                print(f"You should store your credentials in the file {weather.CREDENTIALS.format(HOME=os.environ['HOME'])}")
                 return E_OK
 
             case "help":
