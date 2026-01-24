@@ -71,9 +71,9 @@ import datetime as dt
 import pytz
 import json
 import webbrowser
+import logging
 
 import pandas as pd
-# import h5pyd as h5
 import numpy as np
 from scipy.spatial import cKDTree
 import pvlib
@@ -91,6 +91,8 @@ CREDENTIALS = "{HOME}/.nsrdb/credentials.json"
 
 SIGNUP = "https://developer.nrel.gov/signup/"
 """URL of NSRDB Developer Network sign-up form"""
+
+_logger = logging.getLogger(__file__)
 
 def nsrdb_credentials(path=CREDENTIALS.format(HOME=os.environ["HOME"])):
     """@private 
@@ -112,19 +114,16 @@ def nsrdb_credentials(path=CREDENTIALS.format(HOME=os.environ["HOME"])):
         with open(path,"r") as fh:
             return list(json.load(fh).items())[0]
     except FileNotFoundError:
-        print("ERROR: You are not registered with the NSRDB Developer Network. ",
-            file=sys.stderr)
+        _logger.warning("you are not registered with the NSRDB Developer Network.")
 
     try:
         webbrowser.open(SIGNUP)
-        print("Please fill out the NSRDB Developer Network registration form in the browser window.",
-            file=sys.stderr)
-        raise FileNotFoundError(path)
+        print("Please fill out the NSRDB Developer Network registration form in the browser window.")
     except FileNotFoundError:
+        _logger.error(path)
         pass
     except:
-        print(f"See {SIGNUP} to register with the NSRDB Developer Network",
-            file=sys.stderr)
+        print(f"See {SIGNUP} to register with the NSRDB Developer Network")
         raise
         
 def nsrdb_weather(
@@ -215,16 +214,22 @@ class Weather(pd.DataFrame):
 
             # load from cache
             try:
+            
                 data = pd.read_csv(cache.pathname,
                     index_col=["timestamp"],
                     parse_dates=["timestamp"],
                     )
-            except:
+                _logger.debug(f"{cache.pathname} ok")
+            
+            except Exception as err:
 
                 data = None
+                _logger.debug(f"{cache.pathname} error ({err})")
+                cache.remove()
 
         else:
 
+            _logger.debug(f"{cache.pathname} (re)generation needed")
             data = None
 
         # download data and save to cache
@@ -237,17 +242,20 @@ class Weather(pd.DataFrame):
                 url = f"{self.REFERENCE_SOURCE}/G{fips[:2]}0{fips[2:]}0_2018.csv"
 
                 # download the weather file
-                data = pd.read_csv(url,
-                    usecols=[
-                        "date_time",
-                        "Dry Bulb Temperature [°C]",
-                        "Relative Humidity [%]",
-                        "Global Horizontal Radiation [W/m2]", 
-                        "Direct Normal Radiation [W/m2]",
-                        "Diffuse Horizontal Radiation [W/m2]",
-                        ],
-                    index_col=["date_time"]
-                    )
+                try:
+                    data = pd.read_csv(url,
+                        usecols=[
+                            "date_time",
+                            "Dry Bulb Temperature [°C]",
+                            "Relative Humidity [%]",
+                            "Global Horizontal Radiation [W/m2]", 
+                            "Direct Normal Radiation [W/m2]",
+                            "Diffuse Horizontal Radiation [W/m2]",
+                            ],
+                        index_col=["date_time"]
+                        )
+                except Exception as err:
+                    _logger.error(f"{url=} download failed ({err=})")
 
                 # fix the timezone
                 data.index = pd.DatetimeIndex(data.index,tz=pytz.UTC) - dt.timedelta(hours=tzoffset+1)
@@ -276,7 +284,10 @@ class Weather(pd.DataFrame):
                 latlon = Counties(use_index=["ST","COUNTY"]).loc[state,county][["LAT","LON"]].values.tolist()[0]
 
                 # download the weather data
-                data = nsrdb_weather(*latlon, year)
+                try:
+                    data = nsrdb_weather(*latlon, year)
+                except Exception as err:
+                    _logger.error(f"NSRDB {latlon=} {year=} download failed ({err=})")
 
                 # correct correct names and drop unwanted columns
                 columns = {
@@ -322,20 +333,25 @@ if __name__ == '__main__':
     pd.options.display.width = None
     pd.options.display.max_columns = None
 
+    refresh = "--refresh" in sys.argv
+    debug = "--debug" in sys.argv
+
+    logging.basicConfig(level=logging.DEBUG if debug else logging.INFO)
+
     for state,county in Counties(use_index=["RO","ST","COUNTY"]).loc["WECC"].index.values:
-        print("Processing",state,county,end="...",flush=True)
         try:
-            print("ok")
             for year in [None,2018,2019,2020,2021,2022]:
-                values = Weather(state,county,refresh=False,year=year)
-                # print(f"{state} {county} {year=}")
-                # print(values)
-                # print(pd.DataFrame({
-                #     "Mean":values.mean().T,
-                #     "Min":values.min().T,
-                #     "Max":values.max().T,
-                #     "Stdev":values.std().T,
-                #     }).round(1))
+                values = Weather(state,county,refresh=refresh,year=year)
+                print(f"{state} {county} {year=}")
+                print(values)
+                print(pd.DataFrame({
+                    "Mean":values.mean().T,
+                    "Min":values.min().T,
+                    "Max":values.max().T,
+                    "Stdev":values.std().T,
+                    }).round(1))
+            _logger.info(f"{state} {county} {year} ok")
         except Exception as err:
+            _logger.error(f"{state} {county} {year}: {err}")
             raise
 
