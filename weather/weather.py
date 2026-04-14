@@ -286,6 +286,7 @@ class Weather(pd.DataFrame):
                 # download the weather data
                 try:
                     data = nsrdb_weather(*latlon, year)
+                    assert isinstance(data,pd.DataFrame), f"no weather data found"
                 except Exception as err:
                     _logger.error(f"NSRDB {latlon=} {year=} download failed ({err=})")
 
@@ -297,6 +298,8 @@ class Weather(pd.DataFrame):
                     "dni":"direct_Wpms",
                     "dhi":"diffuse_Wpms",
                 }
+                for column in columns.keys():
+                    assert column in data.columns, f"{column=} not found in weather data"
                 data.drop(set(data.columns)-set(columns),inplace=True,axis=1)
                 data.rename(columns,inplace=True,axis=1)
 
