@@ -89,7 +89,7 @@ _version = 0 # cache schema version
 CREDENTIALS = "{HOME}/.nsrdb/credentials.json"
 """Location of credentials file"""
 
-SIGNUP = "https://developer.nrel.gov/signup/"
+SIGNUP = "https://developer.nlr.gov/signup/"
 """URL of NSRDB Developer Network sign-up form"""
 
 _logger = logging.getLogger(__file__)
