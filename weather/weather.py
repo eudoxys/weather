@@ -15,6 +15,9 @@ attempt to access, the same sign-up form will be opened automatically if you
 are running on a system with a terminal. Otherwise, an exception is raised
 with guidance on how to sign up.
 
+You should place the credentials in the file indicated by `weather.Weather.CREDENTIALS` 
+and presented as `{"YOUR.EMAIL@EXAMPLE.COM": "YOUR_TOKEN"}`.
+
 Example
 -------
 
