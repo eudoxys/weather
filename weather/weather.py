@@ -313,7 +313,7 @@ class Weather(pd.DataFrame):
                 data = data[columns.values()].round(1)
 
                 # change date/time index from end-of-interval to start-of-interval
-                data.index = data.index - dt.timedelta(minutes=30) 
+                data.index = (data.index - dt.timedelta(minutes=30)).tz_convert("UTC")
 
             data.sort_index(inplace=True)
             data.index.name = "timestamp"
