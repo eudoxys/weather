@@ -284,7 +284,7 @@ class Weather(pd.DataFrame):
             else:
 
                 # get the lat/lon of the county
-                latlon = Counties(use_index=["ST","COUNTY"]).loc[state,county][["LAT","LON"]].values.tolist()[0]
+                latlon = Counties(use_index=["ST","COUNTY"]).loc[[(state,county)]][["LAT","LON"]].values.tolist()[0]
 
                 # download the weather data
                 try:
