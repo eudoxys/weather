@@ -54,3 +54,7 @@ Outputs
     2018-12-31 23:00:00+00:00              57.0         20.9        254.0        746.0          52.0
 
     [8760 rows x 5 columns]
+
+# Acknowledgments
+
+- This material is based on work supported by the U.S. Department of Energy’s Office of Electricity through a grant from the Grid Controls and Communications Division
