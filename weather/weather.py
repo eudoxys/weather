@@ -203,7 +203,22 @@ class Weather(pd.DataFrame):
 
         - `year`: specify the actual weather year (default is reference weather)
 
-        - `refresh`: force download of data from source repository
+        - `refresh`: force download of data from source repository, bypassing
+          both the local cache and the archive
+
+        Data is obtained from the first of these that has it:
+
+          1. the local cache file;
+
+          2. the cache archives (by default the Eudoxys WECC data archive at
+             https://github.com/eudoxys/wecc), which is downloaded into the
+             local cache;
+
+          3. the source repository (`REFERENCE_SOURCE` or `ACTUAL_SOURCE`),
+             which is saved to the local cache.
+
+        A cache file that cannot be read is deleted and rebuilt from the
+        source repository.
         """
 
         if self.CACHEDIR:
@@ -212,23 +227,24 @@ class Weather(pd.DataFrame):
             package="weather",
             version=_version)
 
-        # read from cache
-        if cache.exists() and not refresh:
+        # read from cache, downloading it from the archive if it's not local
+        if not refresh and cache.download():
 
             # load from cache
             try:
-            
+
                 data = pd.read_csv(cache.pathname,
                     index_col=["timestamp"],
                     parse_dates=["timestamp"],
                     )
-                _logger.debug(f"{cache.pathname} ok")
-            
+                _logger.debug(f"{cache.pathname} ok" if cache.archive is None
+                    else f"{cache.pathname} ok (downloaded from {cache.archive})")
+
             except Exception as err:
 
                 data = None
                 _logger.debug(f"{cache.pathname} error ({err})")
-                cache.remove()
+                cache.delete()
 
         else:
 
