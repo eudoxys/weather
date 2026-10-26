@@ -299,8 +299,8 @@ class Weather(pd.DataFrame):
                 # convert to Fahrenheit
                 data["temperature_degF"] = (data["temperature_degF"]*9/5+32).round(1)
 
-                # round the humidity values
-                data["humidity_pc"] = data["humidity_pc"].round(1)
+                # round the humidity and solar values
+                data = data.round(1)
 
                 # rotate the records so they're all in the same year
                 data.index = pd.DatetimeIndex([str(x).replace("2019","2018") for x in data.index])

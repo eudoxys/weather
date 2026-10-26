@@ -39,3 +39,9 @@ Issues = "https://github.com/eudoxys/weather/issues"
 
 [project.scripts]
 weather = "weather.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+markers = [
+    "live: accesses the NSRDB over the network (requires NSRDB credentials)",
+    ]
