@@ -13,6 +13,9 @@ docs: $(SOURCE)
 	(source .venv/bin/activate ; pdoc $(PACKAGE)/__init__.py -o $@ --logo $(LOGO) --math --mermaid --logo-link $(LINK))
 
 test:
-	(cd ./test ; source test.sh)
+	test -d .venv || python3 -m venv .venv
+	.venv/bin/python3 -m pip install --upgrade pip
+	.venv/bin/python3 -m pip install --upgrade . -r requirements.txt pytest
+	MPLBACKEND=Agg .venv/bin/python3 -m pytest
 
 .PHONY: docs test # force test to rebuild always
