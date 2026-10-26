@@ -219,6 +219,13 @@ class Weather(pd.DataFrame):
 
         A cache file that cannot be read is deleted and rebuilt from the
         source repository.
+
+        Exceptions
+        ----------
+
+        - `RuntimeError`: the data is not in the cache or the archive and
+          the download from the source repository failed (the original
+          error is chained as `__cause__`)
         """
 
         if self.CACHEDIR:
@@ -274,7 +281,8 @@ class Weather(pd.DataFrame):
                         index_col=["date_time"]
                         )
                 except Exception as err:
-                    _logger.error(f"{url=} download failed ({err=})")
+                    raise RuntimeError(f"{state} {county} reference weather "
+                        f"download from {url} failed ({err})") from err
 
                 # fix the timezone
                 data.index = pd.DatetimeIndex(data.index,tz=pytz.UTC) - dt.timedelta(hours=tzoffset+1)
@@ -307,7 +315,8 @@ class Weather(pd.DataFrame):
                     data = nsrdb_weather(*latlon, year)
                     assert isinstance(data,pd.DataFrame), f"no weather data found"
                 except Exception as err:
-                    _logger.error(f"NSRDB {latlon=} {year=} download failed ({err=})")
+                    raise RuntimeError(f"{state} {county} {year} NSRDB weather "
+                        f"download at {latlon=} failed ({err})") from err
 
                 # correct correct names and drop unwanted columns
                 columns = {
