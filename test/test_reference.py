@@ -50,12 +50,11 @@ def test_celsius_to_fahrenheit(reference_source):
     ("CA", "Alameda", -8),
     ("AZ", "Maricopa", -7),
     ("ID", "Ada", -7), # Idaho south (Mountain time)
-    pytest.param("ID", "Kootenai", -8, # Idaho panhandle (Pacific time)
-        marks=pytest.mark.xfail(strict=True,
-            reason="#3: reference weather uses the state time zone")),
-    pytest.param("OR", "Malheur", -7, # Oregon east (Mountain time)
-        marks=pytest.mark.xfail(strict=True,
-            reason="#3: reference weather uses the state time zone")),
+    ("ID", "Kootenai", -8), # Idaho panhandle (Pacific time)
+    ("OR", "Malheur", -7), # Oregon east (Mountain time)
+    ("TX", "El Paso", -7), # Texas west (Mountain time)
+    ("FL", "Escambia", -6), # Florida panhandle (Central time)
+    ("KY", "Pike", -5), # Kentucky east (Eastern time)
     ])
 def test_county_time_zone(reference_source, state, county, tzoffset):
     """Source rows are local standard time at the end of the interval; output
