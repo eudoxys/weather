@@ -83,11 +83,10 @@ import pvlib
 
 from cache import Cache
 from fips.counties import Counties, County
-from fips.states import State
 
 _nsrdb = None
 _nsrdb_meta = None
-_version = 0 # cache schema version
+_version = 1 # cache schema version (1: reference weather uses the county time zone, #3)
 
 CREDENTIALS = "{HOME}/.nsrdb/credentials.json"
 """Location of credentials file"""
@@ -261,7 +260,7 @@ class Weather(pd.DataFrame):
         # download data and save to cache
         if data is None:
             fips = County(ST=state,COUNTY=county).FIPS
-            tzoffset = float(State(ST=state).TZOFFSET)
+            tzoffset = float(Counties(use_index=["ST","COUNTY"]).loc[[(state,county)]].TZOFFSET.iloc[0])
             if year is None:
 
                 # locate the COMstock weather file
