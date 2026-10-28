@@ -21,8 +21,9 @@ Python >= 3.11, alpha (`version = "0.0.0"`, unreleased).
 
 - `MANIFEST.md`: map of every file, a task index, and what not to read.
   Read it first instead of listing folders.
-- There is no `DESIGN.md`: the package is small and its design is in the
-  `weather/__init__.py` docstring. Add one before a major new subsystem.
+- `DESIGN.md`: design reconstructed from the implementation (draft, not yet
+  agreed), numbered decisions, and open questions. Follow its decisions; ask
+  before departing from one, and update it in the same PR when one changes.
 
 Sibling Eudoxys dependencies:
 

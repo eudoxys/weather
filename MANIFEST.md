@@ -7,13 +7,14 @@ Update this file in the same PR that adds, moves, or deletes a file.
 ## Start here
 
 1. `CLAUDE.md` — conventions, rough edges, and working rules
-2. `weather/__init__.py` — package docs (CLI syntax, columns, limits) and public API
-3. `weather/weather.py` — the `Weather` class: cache, reference and NSRDB downloads
-4. `weather/_test/conftest.py` — how tests mock the network and the cache
+2. `DESIGN.md` — decisions, sources, method, open questions
+3. `weather/__init__.py` — package docs (CLI syntax, columns, limits) and public API
+4. `weather/weather.py` — the `Weather` class: cache, reference and NSRDB downloads
+5. `weather/_test/conftest.py` — how tests mock the network and the cache
 
 ## Task index
 
-- Change an output column or the time index: `weather/weather.py` (both the reference and NSRDB branches), its module docstring example, `weather/__init__.py` Description, `README.md`; bump `_version` in `weather/weather.py`; tests in `weather/_test/test_reference.py` and `test_nsrdb.py`
+- Change an output column or the time index: `weather/weather.py` (both the reference and NSRDB branches), its module docstring example, `weather/__init__.py` Description, `README.md`, `DESIGN.md` decisions/outputs; bump `_version` in `weather/weather.py`; tests in `weather/_test/test_reference.py` and `test_nsrdb.py`
 - Add a data source: `weather/weather.py`; mock it in `weather/_test/conftest.py`; add a `weather/_test/test_<source>.py`
 - Add a CLI command or option: `weather/cli.py`, `weather/__init__.py` Syntax/Commands/Options; test in `weather/_test/test_cli.py`
 - Fix a test: `weather/_test/`; see `weather/_test/README.md`
@@ -49,6 +50,7 @@ Update this file in the same PR that adds, moves, or deletes a file.
 |---|---|---|
 | `README.md` | user overview | |
 | `CLAUDE.md` | assistant guidance | |
+| `DESIGN.md` | package design | draft, reconstructed from code |
 | `MANIFEST.md` | this file | |
 | `CONTRIBUTING.md` | contributor guide | approved-issue rule |
 | `TODO.md` | roadmap | |
