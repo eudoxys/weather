@@ -1,3 +1,4 @@
+# third-party packages (unpinned unless a pin is needed)
 pandas
 requests
 pytz
@@ -5,6 +6,10 @@ matplotlib
 marimo
 h5pyd
 scipy
+
+# GitHub-only packages
 pvlib @ git+https://github.com/pvlib/pvlib-python
+
+# sibling Eudoxys packages
 fips @ git+https://github.com/eudoxys/fips
 cache @ git+https://github.com/eudoxys/cache

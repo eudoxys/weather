@@ -1,4 +1,13 @@
+[![Validation](https://github.com/eudoxys/weather/actions/workflows/validate.yaml/badge.svg)](https://github.com/eudoxys/weather/actions/workflows/validate.yaml)
+[![Documentation](https://github.com/eudoxys/weather/actions/workflows/deploy-pages.yaml/badge.svg)](https://github.com/eudoxys/weather/actions/workflows/deploy-pages.yaml)
+
 US weather data accessor for bulk power systems modeling and simulation
+
+`weather` produces hourly county weather (temperature, humidity, and global,
+direct, and diffuse solar irradiance) on a UTC time index, from the
+RESstock/COMstock 2018 reference weather or, for a given year, from the NSRDB.
+It is for modelers who need consistent weather inputs for load and power
+system studies.
 
 # Documentation
 
@@ -6,7 +15,43 @@ See https://www.eudoxys.com/weather
 
 # Installation
 
+Install using Eudoxys Package Manager:
+
+    pip install --upgrade eudoxys
+    epm install weather
+
+Install using `pip`:
+
     pip install git+https://github.com/eudoxys/weather
+
+# Maintenance
+
+## Update docs
+
+    make docs
+
+## Run tests
+
+    pip install -e . pytest
+    pytest
+
+The tests run offline against generated fixture data. The optional live
+NSRDB test runs only when NSRDB credentials are installed (`weather register`).
+See [`weather/_test/README.md`](weather/_test/README.md).
+
+## Cache build
+
+Downloaded weather is cached by the Eudoxys `cache` package, which first
+looks in the Eudoxys WECC data archive (https://github.com/eudoxys/wecc).
+To rebuild the cache from the sources for every county, for the reference
+weather and every year from 2018 to last year (slow; needs NSRDB
+credentials), run
+
+    python3 -m weather.weather --refresh [RO[,RO[,...]]]
+
+where the optional `RO` arguments limit the update to regional organizations
+(e.g. `WECC`). Other options are `--verbose`, `--quiet`, `--debug`, and
+`--help`.
 
 # Examples
 

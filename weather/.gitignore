@@ -1,0 +1,3 @@
+# weather/.gitignore: generated output that must never be committed
+.cache*
+__marimo__/

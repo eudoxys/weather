@@ -109,6 +109,22 @@ which outputs the following
 
     [8760 rows x 5 columns]
 
+What is not promised
+--------------------
+
+  - Weather is for a single point per county (the county latitude and
+    longitude for NSRDB actual weather, the COMstock county weather file for
+    reference weather); it is not an area average.
+
+  - Reference weather is the COMstock 2018 actual meteorological year only;
+    the `year` argument selects NSRDB actual weather instead.
+
+  - Values are taken from the sources as published, converted and rounded;
+    no gap filling, quality control, or cross-check between the reference
+    and NSRDB sources is done.
+
+  - Wind and other variables available from the sources are not provided.
+
 Package information
 -------------------
 
@@ -120,6 +136,12 @@ Package information
 
 - License: https://github.com/eudoxys/weather/blob/main/LICENSE
 """
+
+try:
+    import importlib.metadata
+    __version__ = importlib.metadata.version("weather")
+except Exception: # pylint: disable=broad-exception-caught
+    __version__ = "dev"
 
 from .weather import Weather
 from .cli import main
