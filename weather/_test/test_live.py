@@ -25,6 +25,7 @@ def _credentials():
         return None
 
 pytestmark = [
+    pytest.mark.network,
     pytest.mark.live,
     pytest.mark.skipif(_credentials() is None,
         reason=f"NSRDB credentials not found in {CREDENTIALS}"),

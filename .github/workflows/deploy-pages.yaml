@@ -1,10 +1,17 @@
 # Simple workflow for deploying static content to GitHub Pages
-name: Deploy Pages
+name: Documentation
 
 on:
   # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
+    # pdoc reads weather/__init__.py and the public modules' docstrings
+    paths:
+      - "weather/*.py"
+      - "Makefile"
+      - "requirements.txt"
+      - "pyproject.toml"
+      - ".github/workflows/deploy-pages.yaml"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
