@@ -96,5 +96,5 @@ Each has an approved issue; fix them in a PR that references it.
 - Update `MANIFEST.md` when adding, moving, or deleting files, and run
   `python .github/check_manifest.py`.
 - Conventional small case: Alameda County CA (`Weather("CA","Alameda")`, and
-  `year=2020` for NSRDB). Don't run `python3 -m weather.weather --refresh`
-  (all WECC counties × 6 years) unprompted.
+  `year=2020` for NSRDB). Don't run `python3 -m weather.weather` (every
+  county, every year since 2018) unprompted.

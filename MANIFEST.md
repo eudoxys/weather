@@ -17,7 +17,7 @@ Update this file in the same PR that adds, moves, or deletes a file.
 - Add a data source: `weather/weather.py`; mock it in `weather/_test/conftest.py`; add a `weather/_test/test_<source>.py`
 - Add a CLI command or option: `weather/cli.py`, `weather/__init__.py` Syntax/Commands/Options; test in `weather/_test/test_cli.py`
 - Fix a test: `weather/_test/`; see `weather/_test/README.md`
-- Rebuild the cache / WECC archive: `python3 -m weather.weather --refresh` (slow; needs NSRDB credentials)
+- Rebuild the cache / WECC archive: `python3 -m weather.weather --refresh [RO ...]` (slow; needs NSRDB credentials)
 - Update docs: docstrings, then `make docs`
 - Release: `pyproject.toml` version; see the eudoxys-package skill checklist
 
@@ -26,7 +26,7 @@ Update this file in the same PR that adds, moves, or deletes a file.
 | Path | Purpose | Notes |
 |---|---|---|
 | `weather/__init__.py` | package docs, re-exports `Weather`, `main`, `__version__` | pdoc landing page |
-| `weather/weather.py` | `Weather` data frame, NSRDB helpers, cache | tested by `_test/test_reference.py`, `test_nsrdb.py`, `test_cache.py`; `__main__` rebuilds the WECC cache |
+| `weather/weather.py` | `Weather` data frame, NSRDB helpers, cache | tested by `_test/test_reference.py`, `test_nsrdb.py`, `test_cache.py`; `__main__` rebuilds the cache (`--help`) |
 | `weather/cli.py` | CLI `main()` | entry point `weather`; tested by `_test/test_cli.py` |
 | `weather/viewer.py` | marimo weather viewer notebook | run by `weather viewer`; not tested |
 | `weather/.gitignore` | generated-output ignores | |

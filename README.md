@@ -43,12 +43,15 @@ See [`weather/_test/README.md`](weather/_test/README.md).
 
 Downloaded weather is cached by the Eudoxys `cache` package, which first
 looks in the Eudoxys WECC data archive (https://github.com/eudoxys/wecc).
-To rebuild the cache for every WECC county and the years 2018–2022 from the
-sources (slow; needs NSRDB credentials), run
+To rebuild the cache from the sources for every county, for the reference
+weather and every year from 2018 to last year (slow; needs NSRDB
+credentials), run
 
-    python3 -m weather.weather --refresh
+    python3 -m weather.weather --refresh [RO[,RO[,...]]]
 
-Add `--debug` for progress messages.
+where the optional `RO` arguments limit the update to regional organizations
+(e.g. `WECC`). Other options are `--verbose`, `--quiet`, `--debug`, and
+`--help`.
 
 # Examples
 
