@@ -66,6 +66,23 @@ which outputs the following
     2018-12-31 23:00:00+00:00              57.0         20.9        254.0        746.0          52.0
 
     [8760 rows x 5 columns]
+
+Cache
+-----
+
+The `weather` module maintains a local cache that can be refreshed using the
+following command:
+
+    python3 weather.py [--refresh] [--verbose] [--quiet] [--debug] [RO[,RO[,...]]]
+
+where `RO` is the code for one of the reliability organizations, e.g., `WECC`.
+
+The options are
+
+- `refresh`: force refresh of the cache from the source
+- `verbose`: output informational progress messages
+- `quiet`: suppress error messages
+- `debug`: raise an exception when an error is encountered
 """
 
 import os
@@ -165,7 +182,7 @@ def nsrdb_weather(
         utc=True, # Set to True for UTC timestamps
         map_variables=True # Renames columns to pvlib standard names
     )
-    psm4.drop(columns=set(psm4.columns)-set(columns),inplace=True)
+    psm4 = psm4.drop(columns=set(psm4.columns)-set(columns))
     psm4.index = pd.to_datetime(psm4.index)
     return psm4.sort_index()
          
@@ -327,8 +344,8 @@ class Weather(pd.DataFrame):
                 }
                 for column in columns.keys():
                     assert column in data.columns, f"{column=} not found in weather data"
-                data.drop(set(data.columns)-set(columns),inplace=True,axis=1)
-                data.rename(columns,inplace=True,axis=1)
+                data = data.drop(set(data.columns)-set(columns),axis=1)
+                data = data.rename(columns,axis=1)
 
                 # convert temperature to Fahrenheit
                 data.temperature_degF = data.temperature_degF * 1.8 + 32
@@ -339,7 +356,7 @@ class Weather(pd.DataFrame):
                 # change date/time index from end-of-interval to start-of-interval
                 data.index = (data.index - dt.timedelta(minutes=30)).tz_convert("UTC")
 
-            data.sort_index(inplace=True)
+            data = data.sort_index()
             data.index.name = "timestamp"
             data.to_csv(cache.pathname,
                 index=True,
@@ -358,30 +375,38 @@ class Weather(pd.DataFrame):
 
 if __name__ == '__main__':
     
+    # script to maintain venv weather cache
+    
     from fips.counties import Counties
 
     pd.options.display.width = None
     pd.options.display.max_columns = None
 
+    if "-h" in sys.argv or "--help" in sys.argv or "help" in sys.argv:
+        print("Syntax: python3",os.path.basename(sys.argv[0]),"[--{help,debug,refresh,verbose,quiet}] [RO[,RO[,...]]]")
+        exit(0)
+
+    quiet = "--quiet" in sys.argv
+    verbose = "--verbose" in sys.argv
     refresh = "--refresh" in sys.argv
     debug = "--debug" in sys.argv
+    ro = [x for x in sys.argv[1:] if not x.startswith("-")]
+    if not ro:
+        ro = np.s_[None:None]
 
     logging.basicConfig(level=logging.DEBUG if debug else logging.INFO)
 
-    for state,county in Counties(use_index=["RO","ST","COUNTY"]).loc["WECC"].index.values:
-        try:
-            for year in [None,2018,2019,2020,2021,2022]:
+    for _,state,county in Counties(use_index=["RO","ST","COUNTY"]).loc[ro].index.values:
+
+        # process the reference year and every year from 2018 to last year
+        for year in [None] + list(range(2018,dt.datetime.now().year)):
+            try:
                 values = Weather(state,county,refresh=refresh,year=year)
-                print(f"{state} {county} {year=}")
-                print(values)
-                print(pd.DataFrame({
-                    "Mean":values.mean().T,
-                    "Min":values.min().T,
-                    "Max":values.max().T,
-                    "Stdev":values.std().T,
-                    }).round(1))
-            _logger.info(f"{state} {county} {year} ok")
-        except Exception as err:
-            _logger.error(f"{state} {county} {year}: {err}")
-            raise
+                if verbose:
+                    _logger.info(f"{state} {county} {year} ok")
+            except KeyboardInterrupt:
+                break
+            except Exception as err:
+                if not quiet:
+                    _logger.error(f"{state} {county} {year} {err}")
 
