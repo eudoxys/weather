@@ -89,8 +89,10 @@ test_cli.py
 -----------
 
 The `weather` command: `info`, `print` to stdout and to `.csv`/`.csv.gz`,
-`plot` to a file, error handling, `--debug`, syntax errors, and the exit
-codes of the installed command. Fast, offline.
+`-V` column selection, `plot` to a file and to a window (mocked), `viewer`
+(marimo mocked) and `register` (browser mocked), one-line errors on stderr,
+`--debug`, syntax errors, and the exit codes of the installed command.
+Fast, offline.
 
 	pytest weather/_test/test_cli.py
 

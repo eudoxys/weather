@@ -20,7 +20,7 @@
 
 - [x] Import without `HOME` set (#6; see `weather.weather.credentials_path`)
 
-- [ ] CLI error output, exit codes, and argument handling (#7)
+- [x] CLI error output, exit codes, and argument handling (#7; see `weather.cli`)
 
 - [ ] Remove dead code in `weather/weather.py` (#10)
 

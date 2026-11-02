@@ -75,9 +75,6 @@ and publishes the docs.
 
 Each has an approved issue; fix them in a PR that references it.
 
-- CLI: `ERROR [[weather]` prefix typo, errors on stdout, `viewer` returns a
-  wait status, `args` is shadowed, `plot` without `-o` returns `None`,
-  `-V` is undocumented (#7).
 - Packaging: unused `scipy`, `h5pyd`, `requests`; `numpy` not declared;
   `pvlib` from git `main` (#9).
 - Dead code in `weather.py` (`leap`, `cKDTree`, `ACTUAL_SOURCE`, `_nsrdb*`) (#10).
