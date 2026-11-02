@@ -266,7 +266,8 @@ class Weather(pd.DataFrame):
 
         - `RuntimeError`: the data is not in the cache or the archive and
           the download from the source repository failed (the original
-          error is chained as `__cause__`)
+          error is chained as `__cause__`), or the downloaded data is empty
+          or lacks a required column
         """
 
         if self.CACHEDIR:
@@ -354,7 +355,8 @@ class Weather(pd.DataFrame):
                 # download the weather data
                 try:
                     data = nsrdb_weather(*latlon, year)
-                    assert isinstance(data,pd.DataFrame), f"no weather data found"
+                    if not isinstance(data,pd.DataFrame) or data.empty:
+                        raise ValueError("no weather data found")
                 except Exception as err:
                     raise RuntimeError(f"{state} {county} {year} NSRDB weather "
                         f"download at {latlon=} failed ({err})") from err
@@ -367,8 +369,10 @@ class Weather(pd.DataFrame):
                     "dni":"direct_Wpms",
                     "dhi":"diffuse_Wpms",
                 }
-                for column in columns.keys():
-                    assert column in data.columns, f"{column=} not found in weather data"
+                missing = [x for x in columns if x not in data.columns]
+                if missing:
+                    raise RuntimeError(f"{state} {county} {year} NSRDB weather "
+                        f"is missing column(s) {missing}")
                 data = data.drop(set(data.columns)-set(columns),axis=1)
                 data = data.rename(columns,axis=1)
 

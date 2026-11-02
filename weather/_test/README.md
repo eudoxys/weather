@@ -59,8 +59,8 @@ test_nsrdb.py
 NSRDB actual weather with the download mocked: the county latitude and
 longitude passed to the request, shape and columns for leap and non-leap
 years, the shift from mid-interval (HH:30) to start-of-interval timestamps,
-Celsius to Fahrenheit, and the error raised when the download fails. Fast,
-offline.
+Celsius to Fahrenheit, and the errors raised when the download fails or
+returns empty data or data missing a column. Fast, offline.
 
 	pytest weather/_test/test_nsrdb.py
 

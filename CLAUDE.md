@@ -45,7 +45,9 @@ Sibling Eudoxys dependencies:
   version=_version)`. Bump `_version` in `weather/weather.py` when the cached
   format or its contents change (it is 1 since the county time zone fix, #3).
   Unreadable cache files are deleted and rebuilt.
-- Download failures raise `RuntimeError` with the cause chained.
+- Download failures and invalid downloaded data raise `RuntimeError` with
+  the cause chained; don't use `assert` for data validation (`python -O`
+  strips it).
 - `Weather.makeargs()` filters keyword arguments by the constructor's
   annotations; keep CLI option names equal to argument names.
 
@@ -73,8 +75,6 @@ and publishes the docs.
 
 Each has an approved issue; fix them in a PR that references it.
 
-- Data validation in `Weather.__init__` uses `assert`, which `python -O`
-  strips (#5; download failures already raise `RuntimeError`).
 - CLI: `ERROR [[weather]` prefix typo, errors on stdout, `viewer` returns a
   wait status, `args` is shadowed, `plot` without `-o` returns `None`,
   `-V` is undocumented (#7).
