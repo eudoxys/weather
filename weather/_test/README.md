@@ -59,8 +59,8 @@ test_nsrdb.py
 NSRDB actual weather with the download mocked: the county latitude and
 longitude passed to the request, shape and columns for leap and non-leap
 years, the shift from mid-interval (HH:30) to start-of-interval timestamps,
-Celsius to Fahrenheit, and the error raised when the download fails. Fast,
-offline.
+Celsius to Fahrenheit, and the errors raised when the download fails or
+returns empty data or data missing a column. Fast, offline.
 
 	pytest weather/_test/test_nsrdb.py
 
@@ -74,12 +74,25 @@ bypasses both the cache and the archive. Fast, offline.
 
 	pytest weather/_test/test_cache.py
 
+test_credentials.py
+-------------------
+
+NSRDB credentials: a valid file is read; a missing file raises a
+`RuntimeError` naming the path and `weather register` (and offers the sign-up
+page, mocked here) without printing; empty, non-JSON, and malformed files
+raise a `RuntimeError`; the default path is resolved from the home folder
+when called; and `import weather` works without `HOME` set. Fast, offline.
+
+	pytest weather/_test/test_credentials.py
+
 test_cli.py
 -----------
 
 The `weather` command: `info`, `print` to stdout and to `.csv`/`.csv.gz`,
-`plot` to a file, error handling, `--debug`, syntax errors, and the exit
-codes of the installed command. Fast, offline.
+`-V` column selection, `plot` to a file and to a window (mocked), `viewer`
+(marimo mocked) and `register` (browser mocked), one-line errors on stderr,
+`--debug`, syntax errors, and the exit codes of the installed command.
+Fast, offline.
 
 	pytest weather/_test/test_cli.py
 

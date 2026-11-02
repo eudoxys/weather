@@ -61,17 +61,20 @@ def test_plot_output(reference_source, tmp_path):
     ])
 def test_failed(args, capsys):
     assert cli.main(*args) == cli.E_FAILED
-    assert "ERROR" in capsys.readouterr().out
+    captured = capsys.readouterr()
+    assert captured.err.startswith("ERROR [weather]: ")
+    assert len(captured.err.splitlines()) == 1
+    assert captured.out == ""
 
 def test_invalid_output(reference_source, tmp_path, capsys):
     reference_source("CA", "Alameda")
     output = str(tmp_path / "weather.txt")
     assert cli.main("print", "-S", "CA", "-C", "Alameda", "-o", output) == cli.E_FAILED
-    assert "is not valid" in capsys.readouterr().out
+    assert "is not valid" in capsys.readouterr().err
     assert not os.path.exists(output)
 
 def test_debug_raises():
-    with pytest.raises(AssertionError, match="county is required"):
+    with pytest.raises(ValueError, match="county is required"):
         cli.main("print", "-S", "CA", "--debug")
 
 @pytest.mark.parametrize("args", [
@@ -86,6 +89,56 @@ def test_syntax_error(args):
 
 @pytest.mark.skipif(WEATHER is None,
     reason="weather command not installed")
+def test_print_variable(reference_source, capsys):
+    reference_source("CA", "Alameda")
+    assert cli.main("print", "-S", "CA", "-C", "Alameda",
+        "-V", "temperature_degF,humidity_pc") == cli.E_OK
+    header = capsys.readouterr().out.splitlines()[0].split()
+    assert header == ["temperature_degF", "humidity_pc"]
+
+def test_unknown_variable(reference_source, capsys):
+    reference_source("CA", "Alameda")
+    assert cli.main("print", "-S", "CA", "-C", "Alameda",
+        "-V", "wind_mps") == cli.E_FAILED
+    assert "wind_mps" in capsys.readouterr().err
+
+def test_plot_show(reference_source, monkeypatch):
+    """`plot` without `--output` shows the plot and returns `E_OK`"""
+    reference_source("CA", "Alameda")
+    shown = []
+    monkeypatch.setattr(cli.plt, "show", lambda: shown.append(True))
+    assert cli.main("plot", "-S", "CA", "-C", "Alameda") == cli.E_OK
+    assert shown == [True]
+
+@pytest.mark.parametrize("returncode", [0, 1])
+def test_viewer(monkeypatch, returncode):
+    """`viewer` returns the exit code of marimo, not a wait status"""
+    calls = []
+    def run(command, **kwargs):
+        calls.append(command)
+        return subprocess.CompletedProcess(command, returncode)
+    monkeypatch.setattr(cli.subprocess, "run", run)
+    assert cli.main("viewer") == returncode
+    assert calls[0][:4] == [sys.executable, "-m", "marimo", "run"]
+    assert calls[0][4].endswith("viewer.py") and os.path.exists(calls[0][4])
+
+def test_register(monkeypatch, capsys):
+    opened = []
+    monkeypatch.setattr(cli.webbrowser, "open", lambda url: opened.append(url) or False)
+    assert cli.main("register") == cli.E_OK
+    assert opened == [cli.SIGNUP]
+    out = capsys.readouterr().out
+    assert cli.SIGNUP in out
+    assert cli.credentials_path() in out
+
+def test_error_before_parse(monkeypatch, capsys):
+    """An error raised before the arguments are parsed is reported, not masked"""
+    def fail(*args, **kwargs):
+        raise RuntimeError("parser setup failed")
+    monkeypatch.setattr(cli.argparse, "ArgumentParser", fail)
+    assert cli.main("info") == cli.E_FAILED
+    assert "parser setup failed" in capsys.readouterr().err
+
 @pytest.mark.parametrize("args,code", [
     (["info"], cli.E_OK),
     (["print", "-S", "CA"], cli.E_FAILED),

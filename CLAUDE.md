@@ -45,7 +45,9 @@ Sibling Eudoxys dependencies:
   version=_version)`. Bump `_version` in `weather/weather.py` when the cached
   format or its contents change (it is 1 since the county time zone fix, #3).
   Unreadable cache files are deleted and rebuilt.
-- Download failures raise `RuntimeError` with the cause chained.
+- Download failures and invalid downloaded data raise `RuntimeError` with
+  the cause chained; don't use `assert` for data validation (`python -O`
+  strips it).
 - `Weather.makeargs()` filters keyword arguments by the constructor's
   annotations; keep CLI option names equal to argument names.
 
@@ -73,19 +75,8 @@ and publishes the docs.
 
 Each has an approved issue; fix them in a PR that references it.
 
-- Missing NSRDB credentials end in an unhelpful `TypeError`, and
-  `nsrdb_credentials()` prints to stdout from library code (#4).
-- Data validation in `Weather.__init__` uses `assert`, which `python -O`
-  strips (#5; download failures already raise `RuntimeError`).
-- `import weather` fails when `HOME` is not set (#6).
-- CLI: `ERROR [[weather]` prefix typo, errors on stdout, `viewer` returns a
-  wait status, `args` is shadowed, `plot` without `-o` returns `None`,
-  `-V` is undocumented (#7).
-- Packaging: unused `scipy`, `h5pyd`, `requests`; `numpy` not declared;
-  `pvlib` from git `main` (#9).
-- Dead code in `weather.py` (`leap`, `cKDTree`, `ACTUAL_SOURCE`, `_nsrdb*`) (#10).
-- Documentation errors: README uses `loads print`; the `weather.py` 2020
-  example omits `year=2020` and shows 2018 output (#11).
+- Packaging: `marimo` and `matplotlib` are required even though only the
+  `viewer` and `plot` commands use them; version is still `0.0.0` (#9).
 - NSRDB timestamp alignment not verified against the reference weather (#12).
 - The viewer is limited to WECC states and 2018–2022 (#14).
 

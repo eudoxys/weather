@@ -1,6 +1,6 @@
 # eudoxys/weather — package design (draft 1)
 
-Status: draft, 2026-10-28; reconstructed from the implementation (after #18),
+Status: draft, 2026-10-28; open question 3 revised 2026-11-02; reconstructed from the implementation (after #18),
 not yet agreed with the maintainer. Where the code does not say why, the
 rationale is a best guess and is marked *(inferred)*.
 
@@ -150,7 +150,7 @@ timestamp
 | county FIPS, `LAT`/`LON`, `TZOFFSET`, `RO` | `fips.counties.Counties`, `County` ✔ |
 | namespaced, versioned cache with archive download | `cache.Cache` ✔ |
 | prebuilt weather archive | eudoxys/wecc `wecc/weather/` ✔ (coverage beyond WECC to confirm) |
-| NSRDB PSM4 download | `pvlib.iotools.get_nsrdb_psm4_aggregated` ✔ (pvlib from git `main`; pin in #9) |
+| NSRDB PSM4 download | `pvlib.iotools.get_nsrdb_psm4_aggregated` ✔ (`pvlib >= 0.13`, the first release that has it) |
 
 ## Known issues to handle
 
@@ -165,6 +165,6 @@ timestamp
 
 1. **NSRDB alignment (#12).** Is −30 minutes correct, or should NSRDB be shifted −60 (hour-ending) or 0? Check peak-GHI hour against the reference on clear days for 2018. A change bumps `_version`.
 2. **Credentials (#13).** Add `NSRDB_API_KEY`/`NSRDB_EMAIL` environment variables, and in what precedence with the file?
-3. **Packaging (#9).** Distribution name, extras for `marimo`/`matplotlib`, and pinned `pvlib`, `fips`, `cache`.
+3. **Packaging (#9).** Unused dependencies are removed, `numpy` is declared, and `pvlib` comes from PyPI (`>= 0.13`). Still open: whether `marimo`/`matplotlib` move to extras (the Eudoxys convention installs everything from `requirements.txt`), and the first release version. A PyPI distribution name and publishing workflow are not needed: Eudoxys packages install from `main` with `epm` or `pip install git+...`.
 4. **Viewer scope (#14).** All states and all available years, or keep WECC 2018–2022?
 5. **Reference year.** Stay with AMY2018 only, or add TMY or other ResStock/ComStock weather years?

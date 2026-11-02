@@ -3,6 +3,7 @@
 import os
 import sys
 import argparse
+import subprocess
 import warnings
 import webbrowser
 import importlib.metadata as meta
@@ -11,6 +12,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 import weather
+from weather.weather import SIGNUP, credentials_path
 
 E_OK = 0
 """Exit code on success"""
@@ -29,13 +31,16 @@ def main(*args:list[str],**kwargs:dict[str,str]) -> int:
     Argument
     --------
 
-    - `*args`: command line arguments (`None` is `sys.argv`)
+    - `*args`: command line arguments (none means use `sys.argv`)
+
+    - `**kwargs`: command line options given as `name=value`
 
     Returns
     -------
 
     - `int`: return/exit code
     """
+    options = None
     try:
 
         # support direct call to main
@@ -63,7 +68,7 @@ def main(*args:list[str],**kwargs:dict[str,str]) -> int:
             help="county name of weather data to collect")
         parser.add_argument("-V","--variable",
             type=str,
-            help="variable to output")
+            help="comma-separated variable(s) to print or plot (default all)")
         parser.add_argument("-Y","--year",
             type=int,
             default=None,
@@ -78,10 +83,10 @@ def main(*args:list[str],**kwargs:dict[str,str]) -> int:
             help="enable debug traceback on exceptions")
 
         # parse arguments
-        args = parser.parse_args()
+        options = parser.parse_args()
 
         # setup warning handling
-        if not args.warning:
+        if not options.warning:
             warnings.showwarning = lambda *x:print(
                 f"WARNING [{__package__}]:",
                 x[0],
@@ -89,16 +94,25 @@ def main(*args:list[str],**kwargs:dict[str,str]) -> int:
                 file=sys.stderr,
                 )
 
-        if args.command in {"print","plot"}:
-            assert not args.state is None, f"state is required"
-            assert not args.county is None, f"county is required"
-            data = weather.Weather(args.state,args.county,args.year)
+        if options.command in {"print","plot"}:
+            if options.state is None:
+                raise ValueError("state is required")
+            if options.county is None:
+                raise ValueError("county is required")
+            data = weather.Weather(options.state,options.county,options.year)
+            if options.variable:
+                variables = options.variable.split(",")
+                unknown = [x for x in variables if x not in data.columns]
+                if unknown:
+                    raise ValueError(f"variable(s) {unknown} not found "
+                        f"(valid variables are {list(data.columns)})")
+                data = data[variables]
 
-        match args.command:
+        match options.command:
             
             case "print":
             
-                if args.output is None:
+                if options.output is None:
 
                     pd.options.display.max_rows=None
                     pd.options.display.max_columns=None
@@ -107,51 +121,57 @@ def main(*args:list[str],**kwargs:dict[str,str]) -> int:
                     print(data)
                     return E_OK
 
-                if args.output.endswith(".csv"):
+                if options.output.endswith(".csv"):
 
-                    data.to_csv(args.output,index=True,header=True)
+                    data.to_csv(options.output,index=True,header=True)
                     return E_OK
 
-                if args.output.endswith(".csv.gz"):
+                if options.output.endswith(".csv.gz"):
 
-                    data.to_csv(args.output,index=True,header=True,compression="gzip")
+                    data.to_csv(options.output,index=True,header=True,compression="gzip")
                     return E_OK
 
-                raise ValueError(f"output={args.output} is not valid")
+                raise ValueError(f"output={options.output} is not valid")
 
             case "plot":
 
                 plt.figure(figsize=(20,10))
-                data[args.variable.split(",") if args.variable else data.columns].plot(
+                data.plot(
                     ax=plt.gca(),
                     grid=True,
                     legend=True,
                     xlabel="Date/Time",
                     ylabel="Value",
-                    title=f"{args.county} {args.state}"
+                    title=f"{options.county} {options.state}"
                     )
 
-                if args.output is None:
+                if options.output is None:
 
                     try:
                         plt.show()
                     except KeyboardInterrupt:
-                        return E_OK
+                        pass
 
                 else:
 
-                    plt.savefig(args.output)
-                    return E_OK
+                    plt.savefig(options.output)
+
+                return E_OK
 
             case "viewer":
 
-                return os.system(f"marimo run {os.path.dirname(__file__)}/viewer.py")
+                return subprocess.run([sys.executable,"-m","marimo","run",
+                    os.path.join(os.path.dirname(__file__),"viewer.py")],
+                    check=False).returncode
 
             case "register":
 
-                webbrowser.open(weather.SIGNUP)
-                print("Please fill out the form in the new browser window to register with the NSRDB Developer Network")
-                print(f"You should store your credentials in the file {weather.CREDENTIALS.format(HOME=os.environ['HOME'])}")
+                if webbrowser.open(SIGNUP):
+                    print("Please fill out the form in the new browser window to register with the NSRDB Developer Network")
+                else:
+                    print(f"Please fill out the form at {SIGNUP} to register with the NSRDB Developer Network")
+                print(f"You should store your credentials in the file {credentials_path()}")
+                print('as {"YOUR.EMAIL@EXAMPLE.COM": "YOUR_TOKEN"}')
                 return E_OK
 
             case "help":
@@ -165,11 +185,11 @@ def main(*args:list[str],**kwargs:dict[str,str]) -> int:
     # pylint: disable=broad-exception-caught
     except Exception as err:
 
-        if getattr(args,"debug"):
+        if getattr(options,"debug",False):
             raise
 
-        print(f"ERROR [[{__package__}]: {err}")
+        print(f"ERROR [{__package__}]: {err}",file=sys.stderr)
         return E_FAILED
 
 if __name__ == "__main__":
-    main("plot","--state","AZ","--county","Maricopa","-V","temperature_degF")
+    sys.exit(main())
