@@ -14,11 +14,11 @@
 
 # Fixes
 
-- [ ] Clear error when NSRDB credentials are missing (#4)
+- [x] Clear error when NSRDB credentials are missing (#4; see `weather.weather.nsrdb_credentials`)
 
 - [ ] Replace data-validation `assert`s with exceptions (#5; download errors fixed by #15)
 
-- [ ] Import without `HOME` set (#6)
+- [x] Import without `HOME` set (#6; see `weather.weather.credentials_path`)
 
 - [ ] CLI error output, exit codes, and argument handling (#7)
 

@@ -73,11 +73,8 @@ and publishes the docs.
 
 Each has an approved issue; fix them in a PR that references it.
 
-- Missing NSRDB credentials end in an unhelpful `TypeError`, and
-  `nsrdb_credentials()` prints to stdout from library code (#4).
 - Data validation in `Weather.__init__` uses `assert`, which `python -O`
   strips (#5; download failures already raise `RuntimeError`).
-- `import weather` fails when `HOME` is not set (#6).
 - CLI: `ERROR [[weather]` prefix typo, errors on stdout, `viewer` returns a
   wait status, `args` is shadowed, `plot` without `-o` returns `None`,
   `-V` is undocumented (#7).

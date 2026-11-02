@@ -74,6 +74,17 @@ bypasses both the cache and the archive. Fast, offline.
 
 	pytest weather/_test/test_cache.py
 
+test_credentials.py
+-------------------
+
+NSRDB credentials: a valid file is read; a missing file raises a
+`RuntimeError` naming the path and `weather register` (and offers the sign-up
+page, mocked here) without printing; empty, non-JSON, and malformed files
+raise a `RuntimeError`; the default path is resolved from the home folder
+when called; and `import weather` works without `HOME` set. Fast, offline.
+
+	pytest weather/_test/test_credentials.py
+
 test_cli.py
 -----------
 

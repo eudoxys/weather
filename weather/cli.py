@@ -11,6 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 import weather
+from weather.weather import SIGNUP, credentials_path
 
 E_OK = 0
 """Exit code on success"""
@@ -149,9 +150,12 @@ def main(*args:list[str],**kwargs:dict[str,str]) -> int:
 
             case "register":
 
-                webbrowser.open(weather.SIGNUP)
-                print("Please fill out the form in the new browser window to register with the NSRDB Developer Network")
-                print(f"You should store your credentials in the file {weather.CREDENTIALS.format(HOME=os.environ['HOME'])}")
+                if webbrowser.open(SIGNUP):
+                    print("Please fill out the form in the new browser window to register with the NSRDB Developer Network")
+                else:
+                    print(f"Please fill out the form at {SIGNUP} to register with the NSRDB Developer Network")
+                print(f"You should store your credentials in the file {credentials_path()}")
+                print('as {"YOUR.EMAIL@EXAMPLE.COM": "YOUR_TOKEN"}')
                 return E_OK
 
             case "help":

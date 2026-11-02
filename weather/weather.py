@@ -113,14 +113,23 @@ SIGNUP = "https://developer.nlr.gov/signup/"
 
 _logger = logging.getLogger(__file__)
 
-def nsrdb_credentials(path=CREDENTIALS.format(HOME=os.environ["HOME"])):
-    """@private 
+def credentials_path() -> str:
+    """@private Return the path of the NSRDB credentials file
+
+    The path is `CREDENTIALS` with `{HOME}` replaced by the user's home
+    folder, resolved when called (not at import) so that importing the
+    package does not need the `HOME` environment variable (#6).
+    """
+    return CREDENTIALS.format(HOME=os.path.expanduser("~"))
+
+def nsrdb_credentials(path:str|None=None) -> tuple[str,str]:
+    """@private
     Read NSRDB credentials
 
     Arguments
     ---------
 
-    - `path`: path to credentials file (defaults to `weather.weather.CREDENTIALS`)
+    - `path`: path to credentials file (default is `credentials_path()`)
 
     Returns
     -------
@@ -128,23 +137,39 @@ def nsrdb_credentials(path=CREDENTIALS.format(HOME=os.environ["HOME"])):
     - `str`: email address
 
     - `str`: access token
-    """
-    try:
-        with open(path,"r") as fh:
-            return list(json.load(fh).items())[0]
-    except FileNotFoundError:
-        _logger.warning("you are not registered with the NSRDB Developer Network.")
 
+    Exceptions
+    ----------
+
+    - `RuntimeError`: the credentials file is missing or malformed. When it
+      is missing, the NSRDB sign-up form is also opened in a browser if one
+      is available.
+    """
+    if path is None:
+        path = credentials_path()
+    expected = 'it must contain {"YOUR.EMAIL@EXAMPLE.COM": "YOUR_TOKEN"}'
     try:
-        webbrowser.open(SIGNUP)
-        print("Please fill out the NSRDB Developer Network registration form in the browser window.")
-    except FileNotFoundError:
-        _logger.error(path)
-        pass
-    except:
-        print(f"See {SIGNUP} to register with the NSRDB Developer Network")
-        raise
-        
+        with open(path,"r",encoding="utf-8") as fh:
+            credentials = json.load(fh)
+    except FileNotFoundError as err:
+        opened = False
+        try:
+            opened = webbrowser.open(SIGNUP)
+        except Exception: # pylint: disable=broad-exception-caught
+            pass
+        _logger.debug(f"browser {'opened' if opened else 'not available'} for {SIGNUP}")
+        raise RuntimeError(f"NSRDB credentials file {path} not found; "
+            f"register at {SIGNUP} (or run `weather register`) and save "
+            f"your credentials in that file ({expected})") from err
+    except (OSError,ValueError) as err:
+        raise RuntimeError(f"NSRDB credentials file {path} is not readable "
+            f"JSON ({expected})") from err
+
+    if not isinstance(credentials,dict) or len(credentials) != 1 \
+            or not all(isinstance(x,str) and x for x in next(iter(credentials.items()))):
+        raise RuntimeError(f"NSRDB credentials file {path} is malformed ({expected})")
+    return next(iter(credentials.items()))
+
 def nsrdb_weather(
     lat:str,
     lon:str,
