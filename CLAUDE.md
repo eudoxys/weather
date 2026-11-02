@@ -75,8 +75,8 @@ and publishes the docs.
 
 Each has an approved issue; fix them in a PR that references it.
 
-- Packaging: unused `scipy`, `h5pyd`, `requests`; `numpy` not declared;
-  `pvlib` from git `main` (#9).
+- Packaging: `marimo` and `matplotlib` are required even though only the
+  `viewer` and `plot` commands use them; version is still `0.0.0` (#9).
 - Documentation errors: README uses `loads print`; the `weather.py` 2020
   example omits `year=2020` and shows 2018 output (#11).
 - NSRDB timestamp alignment not verified against the reference weather (#12).

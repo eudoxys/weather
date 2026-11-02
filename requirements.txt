@@ -1,14 +1,10 @@
 # third-party packages (unpinned unless a pin is needed)
+numpy
 pandas
-requests
 pytz
 matplotlib
 marimo
-h5pyd
-scipy
-
-# GitHub-only packages
-pvlib @ git+https://github.com/pvlib/pvlib-python
+pvlib >= 0.13 # first release with iotools.get_nsrdb_psm4_aggregated
 
 # sibling Eudoxys packages
 fips @ git+https://github.com/eudoxys/fips

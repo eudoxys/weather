@@ -34,4 +34,6 @@
 
 # Release
 
-- [ ] Packaging for release: version, dependencies, extras (#9)
+- [x] Remove unused dependencies, declare `numpy`, `pvlib` from PyPI (#9)
+
+- [ ] Packaging for release: version, extras (#9)
