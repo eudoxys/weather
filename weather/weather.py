@@ -1,50 +1,33 @@
 """Weather data accessor
 
-Access the RESstock/COMstock or NSRB weather data for US.
+Access the RESstock/COMstock reference weather or the NSRDB actual weather
+for US counties.
 
 Credentials
 -----------
 
-To access the NSRDB data you must obtain a token from NLR (formerly NREL).
-You can install your access token by running the following command
+Reference weather needs no credentials. Actual weather (a `year` argument)
+is downloaded from the NSRDB, which needs an API key from the NLR (formerly
+NREL) Developer Network. To get one, run
 
     weather register
 
-and filling out the form in the browser window. Alternative, when you first
-attempt to access, the same sign-up form will be opened automatically if you
-are running on a system with a terminal. Otherwise, an exception is raised
-with guidance on how to sign up.
+and fill out the form in the browser window (the URL is printed when no
+browser is available). Save the credentials in the file given by
+`weather.weather.CREDENTIALS` (`~/.nsrdb/credentials.json`) as
 
-You should place the credentials in the file indicated by `weather.Weather.CREDENTIALS` 
-and presented as `{"YOUR.EMAIL@EXAMPLE.COM": "YOUR_TOKEN"}`.
+    {"YOUR.EMAIL@EXAMPLE.COM": "YOUR_TOKEN"}
 
-Example
--------
+Alternatively, when an NSRDB download is first attempted without
+credentials, the sign-up form is opened in a browser if one is available,
+and a `RuntimeError` is raised that names the credentials file and the
+expected format.
 
-To get the RESstock/COMstock reference weather data for Alameda County CA use
-the command
+Examples
+--------
 
-    from weather import Weather
-    Weather("CA","Alameda")
-
-which outputs the following
-
-                                temperature_degF  ...    diffuse_Wpms
-    2018-01-01 00:00:00+00:00              53.96  ...            32.0
-    2018-01-01 01:00:00+00:00              51.98  ...             2.0
-    2018-01-01 02:00:00+00:00              51.08  ...             0.0
-    2018-01-01 03:00:00+00:00              51.08  ...             0.0
-    2018-01-01 04:00:00+00:00              51.08  ...             0.0
-    ...                                      ...  ...             ...
-    2018-12-31 19:00:00+00:00              57.02  ...            58.0
-    2018-12-31 20:00:00+00:00              57.92  ...            61.5
-    2018-12-31 21:00:00+00:00              57.92  ...            63.5
-    2018-12-31 22:00:00+00:00              57.92  ...            58.5
-    2018-12-31 23:00:00+00:00              57.02  ...            52.0
-
-    [8760 rows x 5 columns]
-
-To get the actual weather data for Alameda County CA in 2020 use the command
+To get the RESstock/COMstock reference weather data for Alameda County CA
+use the command
 
     from weather import Weather
     Weather("CA","Alameda")
@@ -67,13 +50,45 @@ which outputs the following
 
     [8760 rows x 5 columns]
 
+To get the actual weather data for Alameda County CA in 2020 use the command
+
+    from weather import Weather
+    Weather("CA","Alameda",year=2020)
+
+which outputs the following (2020 is a leap year, so there are 8784 hours)
+
+                               temperature_degF  humidity_pc  global_Wpms  direct_Wpms  diffuse_Wpms
+    timestamp                                                                                       
+    2020-01-01 00:00:00+00:00              50.9         83.2         37.0         40.0          34.0
+    2020-01-01 01:00:00+00:00              49.5         79.7          0.0          0.0           0.0
+    2020-01-01 02:00:00+00:00              48.9         80.9          0.0          0.0           0.0
+    2020-01-01 03:00:00+00:00              48.7         79.8          0.0          0.0           0.0
+    2020-01-01 04:00:00+00:00              48.0         80.3          0.0          0.0           0.0
+    ...                                     ...          ...          ...          ...           ...
+    2020-12-31 19:00:00+00:00              54.9         60.5        497.0        891.0          70.0
+    2020-12-31 20:00:00+00:00              56.7         53.4        506.0        890.0          72.0
+    2020-12-31 21:00:00+00:00              57.4         50.7        456.0        859.0          71.0
+    2020-12-31 22:00:00+00:00              57.2         50.5        351.0        797.0          63.0
+    2020-12-31 23:00:00+00:00              53.6         58.6        207.0        668.0          51.0
+
+    [8784 rows x 5 columns]
+
 Cache
 -----
 
-The `weather` module maintains a local cache that can be refreshed using the
-following command:
+Downloaded weather is saved by the Eudoxys `cache` package in
+`CACHEDIR/weather/VERSION/ST/COUNTY/W.csv.gz` (reference weather) or
+`W_YEAR.csv.gz` (actual weather), where `CACHEDIR` is the `cache` package
+default (inside its installed package folder) unless `Weather.CACHEDIR` is
+set. Missing files are first fetched from the Eudoxys WECC data archive
+(https://github.com/eudoxys/wecc). Use `Weather(...,refresh=True)` to
+download one county again from the source, or `cache clear` to delete the
+cache.
 
-    python3 weather.py [--refresh] [--verbose] [--quiet] [--debug] [RO[,RO[,...]]]
+To rebuild the cache for every county, for the reference weather and every
+year from 2018 to last year (slow; needs NSRDB credentials), run
+
+    python3 -m weather.weather [--refresh] [--verbose] [--quiet] [--debug] [RO[,RO[,...]]]
 
 where `RO` is the code for one of the reliability organizations, e.g., `WECC`.
 
@@ -82,7 +97,29 @@ The options are
 - `refresh`: force refresh of the cache from the source
 - `verbose`: output informational progress messages
 - `quiet`: suppress error messages
-- `debug`: raise an exception when an error is encountered
+- `debug`: output debug log messages
+
+Caveats
+-------
+
+- Actual weather is available for the years covered by the NSRDB GOES
+  Aggregated v4 dataset (1998 to 2024 when this was written; later years
+  are added as they are released). Years outside the dataset fail with a
+  `RuntimeError`.
+
+- Reference weather is the COMstock 2018 actual meteorological year only.
+
+References
+----------
+
+- Reference weather: NREL, *End-Use Load Profiles for the U.S. Building
+  Stock* (2021), ComStock AMY2018 release 1 weather files,
+  https://dx.doi.org/10.25984/1876417, licensed CC BY 4.0.
+
+- Actual weather: NSRDB GOES Aggregated v4.0.0,
+  https://developer.nlr.gov/docs/solar/nsrdb/nsrdb-GOES-aggregated-v4-0-0-download/,
+  downloaded with `pvlib.iotools.get_nsrdb_psm4_aggregated`; use is subject
+  to the NLR Developer Network terms of use.
 """
 
 import os

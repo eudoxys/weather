@@ -24,6 +24,19 @@ Install using `pip`:
 
     pip install git+https://github.com/eudoxys/weather
 
+## NSRDB credentials
+
+Reference weather needs no credentials. Actual weather for a given year
+(`-Y YEAR` or `year=YEAR`) is downloaded from the NSRDB, which needs a free
+API key from the NLR (formerly NREL) Developer Network. Run
+
+    weather register
+
+fill out the form, and save the email and key you receive in
+`~/.nsrdb/credentials.json` as
+
+    {"YOUR.EMAIL@EXAMPLE.COM": "YOUR_TOKEN"}
+
 # Maintenance
 
 ## Update docs
@@ -59,7 +72,7 @@ where the optional `RO` arguments limit the update to regional organizations
 
 Get the Alameda County CA reference weather data
 
-    loads print -S=CA -C=Alameda
+    weather print -S=CA -C=Alameda
 
 Outputs
 
@@ -99,6 +112,20 @@ Outputs
     2018-12-31 23:00:00+00:00              57.0         20.9        254.0        746.0          52.0
 
     [8760 rows x 5 columns]
+
+# Data sources
+
+- Reference weather: NREL, *End-Use Load Profiles for the U.S. Building
+  Stock* (2021), ComStock AMY2018 weather, https://dx.doi.org/10.25984/1876417
+  (CC BY 4.0).
+
+- Actual weather: NSRDB GOES Aggregated v4.0.0 (1998 to 2024 when this was
+  written), https://developer.nlr.gov/docs/solar/nsrdb/nsrdb-GOES-aggregated-v4-0-0-download/,
+  subject to the NLR Developer Network terms of use.
+
+Downloaded weather is cached (see the `weather.weather` documentation for
+the location); use `refresh=True` to download it again, or `cache clear` to
+delete the cache.
 
 # Acknowledgments
 

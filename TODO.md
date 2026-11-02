@@ -24,7 +24,7 @@
 
 - [x] Remove dead code in `weather/weather.py` (#10)
 
-- [ ] Documentation errors in README and docstrings (#11)
+- [x] Documentation errors in README and docstrings (#11)
 
 # Tools
 
