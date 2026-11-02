@@ -22,7 +22,7 @@
 
 - [x] CLI error output, exit codes, and argument handling (#7; see `weather.cli`)
 
-- [ ] Remove dead code in `weather/weather.py` (#10)
+- [x] Remove dead code in `weather/weather.py` (#10)
 
 - [ ] Documentation errors in README and docstrings (#11)
 

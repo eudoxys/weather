@@ -105,7 +105,6 @@ def _(Weather, county_ui, mo, state_ui, year_ui):
 @app.cell
 def _():
     import marimo as mo
-    import h5pyd as h5
     import pandas as pd
     import numpy as np
     import datetime as dt

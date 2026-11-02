@@ -77,7 +77,6 @@ Each has an approved issue; fix them in a PR that references it.
 
 - Packaging: unused `scipy`, `h5pyd`, `requests`; `numpy` not declared;
   `pvlib` from git `main` (#9).
-- Dead code in `weather.py` (`leap`, `cKDTree`, `ACTUAL_SOURCE`, `_nsrdb*`) (#10).
 - Documentation errors: README uses `loads print`; the `weather.py` 2020
   example omits `year=2020` and shows 2018 output (#11).
 - NSRDB timestamp alignment not verified against the reference weather (#12).

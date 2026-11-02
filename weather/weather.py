@@ -95,14 +95,11 @@ import logging
 
 import pandas as pd
 import numpy as np
-from scipy.spatial import cKDTree
 import pvlib
 
 from cache import Cache
 from fips.counties import Counties, County
 
-_nsrdb = None
-_nsrdb_meta = None
 _version = 1 # cache schema version (1: reference weather uses the county time zone, #3)
 
 CREDENTIALS = "{HOME}/.nsrdb/credentials.json"
@@ -192,7 +189,6 @@ def nsrdb_weather(
 
     - `pandas.DataFrame`: data frame containing requested weather data
     """
-    leap = (year%4 == 0)
     email, api_key = nsrdb_credentials()
     # Pull from API and save locally
     columns = ["temp_air","relative_humidity","ghi", "dni", "dhi",]
@@ -224,9 +220,6 @@ class Weather(pd.DataFrame):
         "weather/amy2018"
     """Source for reference weather when no year is provided"""
 
-    ACTUAL_SOURCE = "/nrel/nsrdb/GOES/aggregated/v4.0.0/nsrdb_{year}.h5"
-    """Source for actual weather when a year is provided"""
-
     def __init__(self,
         state:str,
         county:str,
@@ -255,7 +248,8 @@ class Weather(pd.DataFrame):
              https://github.com/eudoxys/wecc), which is downloaded into the
              local cache;
 
-          3. the source repository (`REFERENCE_SOURCE` or `ACTUAL_SOURCE`),
+          3. the source repository (`REFERENCE_SOURCE` without a `year`, or
+             the NSRDB PSM4 aggregated data through `pvlib` with a `year`),
              which is saved to the local cache.
 
         A cache file that cannot be read is deleted and rebuilt from the
@@ -361,7 +355,7 @@ class Weather(pd.DataFrame):
                     raise RuntimeError(f"{state} {county} {year} NSRDB weather "
                         f"download at {latlon=} failed ({err})") from err
 
-                # correct correct names and drop unwanted columns
+                # rename columns
                 columns = {
                     "temp_air":"temperature_degF",
                     "relative_humidity":"humidity_pc",
@@ -373,7 +367,6 @@ class Weather(pd.DataFrame):
                 if missing:
                     raise RuntimeError(f"{state} {county} {year} NSRDB weather "
                         f"is missing column(s) {missing}")
-                data = data.drop(set(data.columns)-set(columns),axis=1)
                 data = data.rename(columns,axis=1)
 
                 # convert temperature to Fahrenheit
@@ -393,7 +386,6 @@ class Weather(pd.DataFrame):
                 compression="gzip" if cache.name.endswith(".gz") else None,
                 )
 
-        # move year-end data to beginning
         super().__init__(data)
 
     @classmethod
