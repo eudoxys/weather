@@ -11,7 +11,7 @@ dependencies = {file=["requirements.txt"]}
 
 [project]
 name = "weather"
-version = "0.0.0" # 0.0.0 = unreleased (hidden by `epm index`)
+version = "26.11.0"
 description = "US weather data"
 authors = [
     {name = "David P. Chassin <dchassin@eudoxys.com>"},
