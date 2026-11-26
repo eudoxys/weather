@@ -1,50 +1,33 @@
 """Weather data accessor
 
-Access the RESstock/COMstock or NSRB weather data for US.
+Access the RESstock/COMstock reference weather or the NSRDB actual weather
+for US counties.
 
 Credentials
 -----------
 
-To access the NSRDB data you must obtain a token from NLR (formerly NREL).
-You can install your access token by running the following command
+Reference weather needs no credentials. Actual weather (a `year` argument)
+is downloaded from the NSRDB, which needs an API key from the NLR (formerly
+NREL) Developer Network. To get one, run
 
     weather register
 
-and filling out the form in the browser window. Alternative, when you first
-attempt to access, the same sign-up form will be opened automatically if you
-are running on a system with a terminal. Otherwise, an exception is raised
-with guidance on how to sign up.
+and fill out the form in the browser window (the URL is printed when no
+browser is available). Save the credentials in the file given by
+`weather.weather.CREDENTIALS` (`~/.nsrdb/credentials.json`) as
 
-You should place the credentials in the file indicated by `weather.Weather.CREDENTIALS` 
-and presented as `{"YOUR.EMAIL@EXAMPLE.COM": "YOUR_TOKEN"}`.
+    {"YOUR.EMAIL@EXAMPLE.COM": "YOUR_TOKEN"}
 
-Example
--------
+Alternatively, when an NSRDB download is first attempted without
+credentials, the sign-up form is opened in a browser if one is available,
+and a `RuntimeError` is raised that names the credentials file and the
+expected format.
 
-To get the RESstock/COMstock reference weather data for Alameda County CA use
-the command
+Examples
+--------
 
-    from weather import Weather
-    Weather("CA","Alameda")
-
-which outputs the following
-
-                                temperature_degF  ...    diffuse_Wpms
-    2018-01-01 00:00:00+00:00              53.96  ...            32.0
-    2018-01-01 01:00:00+00:00              51.98  ...             2.0
-    2018-01-01 02:00:00+00:00              51.08  ...             0.0
-    2018-01-01 03:00:00+00:00              51.08  ...             0.0
-    2018-01-01 04:00:00+00:00              51.08  ...             0.0
-    ...                                      ...  ...             ...
-    2018-12-31 19:00:00+00:00              57.02  ...            58.0
-    2018-12-31 20:00:00+00:00              57.92  ...            61.5
-    2018-12-31 21:00:00+00:00              57.92  ...            63.5
-    2018-12-31 22:00:00+00:00              57.92  ...            58.5
-    2018-12-31 23:00:00+00:00              57.02  ...            52.0
-
-    [8760 rows x 5 columns]
-
-To get the actual weather data for Alameda County CA in 2020 use the command
+To get the RESstock/COMstock reference weather data for Alameda County CA
+use the command
 
     from weather import Weather
     Weather("CA","Alameda")
@@ -67,13 +50,45 @@ which outputs the following
 
     [8760 rows x 5 columns]
 
+To get the actual weather data for Alameda County CA in 2020 use the command
+
+    from weather import Weather
+    Weather("CA","Alameda",year=2020)
+
+which outputs the following (2020 is a leap year, so there are 8784 hours)
+
+                               temperature_degF  humidity_pc  global_Wpms  direct_Wpms  diffuse_Wpms
+    timestamp                                                                                       
+    2020-01-01 00:00:00+00:00              50.9         83.2         37.0         40.0          34.0
+    2020-01-01 01:00:00+00:00              49.5         79.7          0.0          0.0           0.0
+    2020-01-01 02:00:00+00:00              48.9         80.9          0.0          0.0           0.0
+    2020-01-01 03:00:00+00:00              48.7         79.8          0.0          0.0           0.0
+    2020-01-01 04:00:00+00:00              48.0         80.3          0.0          0.0           0.0
+    ...                                     ...          ...          ...          ...           ...
+    2020-12-31 19:00:00+00:00              54.9         60.5        497.0        891.0          70.0
+    2020-12-31 20:00:00+00:00              56.7         53.4        506.0        890.0          72.0
+    2020-12-31 21:00:00+00:00              57.4         50.7        456.0        859.0          71.0
+    2020-12-31 22:00:00+00:00              57.2         50.5        351.0        797.0          63.0
+    2020-12-31 23:00:00+00:00              53.6         58.6        207.0        668.0          51.0
+
+    [8784 rows x 5 columns]
+
 Cache
 -----
 
-The `weather` module maintains a local cache that can be refreshed using the
-following command:
+Downloaded weather is saved by the Eudoxys `cache` package in
+`CACHEDIR/weather/VERSION/ST/COUNTY/W.csv.gz` (reference weather) or
+`W_YEAR.csv.gz` (actual weather), where `CACHEDIR` is the `cache` package
+default (inside its installed package folder) unless `Weather.CACHEDIR` is
+set. Missing files are first fetched from the Eudoxys WECC data archive
+(https://github.com/eudoxys/wecc). Use `Weather(...,refresh=True)` to
+download one county again from the source, or `cache clear` to delete the
+cache.
 
-    python3 weather.py [--refresh] [--verbose] [--quiet] [--debug] [RO[,RO[,...]]]
+To rebuild the cache for every county, for the reference weather and every
+year from 2018 to last year (slow; needs NSRDB credentials), run
+
+    python3 -m weather.weather [--refresh] [--verbose] [--quiet] [--debug] [RO[,RO[,...]]]
 
 where `RO` is the code for one of the reliability organizations, e.g., `WECC`.
 
@@ -82,7 +97,29 @@ The options are
 - `refresh`: force refresh of the cache from the source
 - `verbose`: output informational progress messages
 - `quiet`: suppress error messages
-- `debug`: raise an exception when an error is encountered
+- `debug`: output debug log messages
+
+Caveats
+-------
+
+- Actual weather is available for the years covered by the NSRDB GOES
+  Aggregated v4 dataset (1998 to 2024 when this was written; later years
+  are added as they are released). Years outside the dataset fail with a
+  `RuntimeError`.
+
+- Reference weather is the COMstock 2018 actual meteorological year only.
+
+References
+----------
+
+- Reference weather: NREL, *End-Use Load Profiles for the U.S. Building
+  Stock* (2021), ComStock AMY2018 release 1 weather files,
+  https://dx.doi.org/10.25984/1876417, licensed CC BY 4.0.
+
+- Actual weather: NSRDB GOES Aggregated v4.0.0,
+  https://developer.nlr.gov/docs/solar/nsrdb/nsrdb-GOES-aggregated-v4-0-0-download/,
+  downloaded with `pvlib.iotools.get_nsrdb_psm4_aggregated`; use is subject
+  to the NLR Developer Network terms of use.
 """
 
 import os
@@ -95,14 +132,11 @@ import logging
 
 import pandas as pd
 import numpy as np
-from scipy.spatial import cKDTree
 import pvlib
 
 from cache import Cache
 from fips.counties import Counties, County
 
-_nsrdb = None
-_nsrdb_meta = None
 _version = 1 # cache schema version (1: reference weather uses the county time zone, #3)
 
 CREDENTIALS = "{HOME}/.nsrdb/credentials.json"
@@ -113,14 +147,23 @@ SIGNUP = "https://developer.nlr.gov/signup/"
 
 _logger = logging.getLogger(__file__)
 
-def nsrdb_credentials(path=CREDENTIALS.format(HOME=os.environ["HOME"])):
-    """@private 
+def credentials_path() -> str:
+    """@private Return the path of the NSRDB credentials file
+
+    The path is `CREDENTIALS` with `{HOME}` replaced by the user's home
+    folder, resolved when called (not at import) so that importing the
+    package does not need the `HOME` environment variable (#6).
+    """
+    return CREDENTIALS.format(HOME=os.path.expanduser("~"))
+
+def nsrdb_credentials(path:str|None=None) -> tuple[str,str]:
+    """@private
     Read NSRDB credentials
 
     Arguments
     ---------
 
-    - `path`: path to credentials file (defaults to `weather.weather.CREDENTIALS`)
+    - `path`: path to credentials file (default is `credentials_path()`)
 
     Returns
     -------
@@ -128,23 +171,39 @@ def nsrdb_credentials(path=CREDENTIALS.format(HOME=os.environ["HOME"])):
     - `str`: email address
 
     - `str`: access token
-    """
-    try:
-        with open(path,"r") as fh:
-            return list(json.load(fh).items())[0]
-    except FileNotFoundError:
-        _logger.warning("you are not registered with the NSRDB Developer Network.")
 
+    Exceptions
+    ----------
+
+    - `RuntimeError`: the credentials file is missing or malformed. When it
+      is missing, the NSRDB sign-up form is also opened in a browser if one
+      is available.
+    """
+    if path is None:
+        path = credentials_path()
+    expected = 'it must contain {"YOUR.EMAIL@EXAMPLE.COM": "YOUR_TOKEN"}'
     try:
-        webbrowser.open(SIGNUP)
-        print("Please fill out the NSRDB Developer Network registration form in the browser window.")
-    except FileNotFoundError:
-        _logger.error(path)
-        pass
-    except:
-        print(f"See {SIGNUP} to register with the NSRDB Developer Network")
-        raise
-        
+        with open(path,"r",encoding="utf-8") as fh:
+            credentials = json.load(fh)
+    except FileNotFoundError as err:
+        opened = False
+        try:
+            opened = webbrowser.open(SIGNUP)
+        except Exception: # pylint: disable=broad-exception-caught
+            pass
+        _logger.debug(f"browser {'opened' if opened else 'not available'} for {SIGNUP}")
+        raise RuntimeError(f"NSRDB credentials file {path} not found; "
+            f"register at {SIGNUP} (or run `weather register`) and save "
+            f"your credentials in that file ({expected})") from err
+    except (OSError,ValueError) as err:
+        raise RuntimeError(f"NSRDB credentials file {path} is not readable "
+            f"JSON ({expected})") from err
+
+    if not isinstance(credentials,dict) or len(credentials) != 1 \
+            or not all(isinstance(x,str) and x for x in next(iter(credentials.items()))):
+        raise RuntimeError(f"NSRDB credentials file {path} is malformed ({expected})")
+    return next(iter(credentials.items()))
+
 def nsrdb_weather(
     lat:str,
     lon:str,
@@ -167,7 +226,6 @@ def nsrdb_weather(
 
     - `pandas.DataFrame`: data frame containing requested weather data
     """
-    leap = (year%4 == 0)
     email, api_key = nsrdb_credentials()
     # Pull from API and save locally
     columns = ["temp_air","relative_humidity","ghi", "dni", "dhi",]
@@ -199,9 +257,6 @@ class Weather(pd.DataFrame):
         "weather/amy2018"
     """Source for reference weather when no year is provided"""
 
-    ACTUAL_SOURCE = "/nrel/nsrdb/GOES/aggregated/v4.0.0/nsrdb_{year}.h5"
-    """Source for actual weather when a year is provided"""
-
     def __init__(self,
         state:str,
         county:str,
@@ -230,7 +285,8 @@ class Weather(pd.DataFrame):
              https://github.com/eudoxys/wecc), which is downloaded into the
              local cache;
 
-          3. the source repository (`REFERENCE_SOURCE` or `ACTUAL_SOURCE`),
+          3. the source repository (`REFERENCE_SOURCE` without a `year`, or
+             the NSRDB PSM4 aggregated data through `pvlib` with a `year`),
              which is saved to the local cache.
 
         A cache file that cannot be read is deleted and rebuilt from the
@@ -241,7 +297,8 @@ class Weather(pd.DataFrame):
 
         - `RuntimeError`: the data is not in the cache or the archive and
           the download from the source repository failed (the original
-          error is chained as `__cause__`)
+          error is chained as `__cause__`), or the downloaded data is empty
+          or lacks a required column
         """
 
         if self.CACHEDIR:
@@ -329,12 +386,13 @@ class Weather(pd.DataFrame):
                 # download the weather data
                 try:
                     data = nsrdb_weather(*latlon, year)
-                    assert isinstance(data,pd.DataFrame), f"no weather data found"
+                    if not isinstance(data,pd.DataFrame) or data.empty:
+                        raise ValueError("no weather data found")
                 except Exception as err:
                     raise RuntimeError(f"{state} {county} {year} NSRDB weather "
                         f"download at {latlon=} failed ({err})") from err
 
-                # correct correct names and drop unwanted columns
+                # rename columns
                 columns = {
                     "temp_air":"temperature_degF",
                     "relative_humidity":"humidity_pc",
@@ -342,9 +400,10 @@ class Weather(pd.DataFrame):
                     "dni":"direct_Wpms",
                     "dhi":"diffuse_Wpms",
                 }
-                for column in columns.keys():
-                    assert column in data.columns, f"{column=} not found in weather data"
-                data = data.drop(set(data.columns)-set(columns),axis=1)
+                missing = [x for x in columns if x not in data.columns]
+                if missing:
+                    raise RuntimeError(f"{state} {county} {year} NSRDB weather "
+                        f"is missing column(s) {missing}")
                 data = data.rename(columns,axis=1)
 
                 # convert temperature to Fahrenheit
@@ -364,7 +423,6 @@ class Weather(pd.DataFrame):
                 compression="gzip" if cache.name.endswith(".gz") else None,
                 )
 
-        # move year-end data to beginning
         super().__init__(data)
 
     @classmethod

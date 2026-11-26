@@ -14,17 +14,17 @@
 
 # Fixes
 
-- [ ] Clear error when NSRDB credentials are missing (#4)
+- [x] Clear error when NSRDB credentials are missing (#4; see `weather.weather.nsrdb_credentials`)
 
-- [ ] Replace data-validation `assert`s with exceptions (#5; download errors fixed by #15)
+- [x] Replace data-validation `assert`s with exceptions (#5; download errors fixed by #15)
 
-- [ ] Import without `HOME` set (#6)
+- [x] Import without `HOME` set (#6; see `weather.weather.credentials_path`)
 
-- [ ] CLI error output, exit codes, and argument handling (#7)
+- [x] CLI error output, exit codes, and argument handling (#7; see `weather.cli`)
 
-- [ ] Remove dead code in `weather/weather.py` (#10)
+- [x] Remove dead code in `weather/weather.py` (#10)
 
-- [ ] Documentation errors in README and docstrings (#11)
+- [x] Documentation errors in README and docstrings (#11)
 
 # Tools
 
@@ -34,4 +34,6 @@
 
 # Release
 
-- [ ] Packaging for release: version, dependencies, extras (#9)
+- [x] Remove unused dependencies, declare `numpy`, `pvlib` from PyPI (#9)
+
+- [ ] Packaging for release: version, extras (#9)

@@ -3,7 +3,7 @@
 Syntax
 ------
     
-    weather [-S STATE] [-C COUNTY] [-Y YEAR]
+    weather [-S STATE] [-C COUNTY] [-Y YEAR] [-V VARIABLE[,...]]
             [-d] [-h] [-w] [-o OUTPUT]
             {help,info,plot,print,register,viewer}
 
@@ -15,13 +15,15 @@ Commands
   - `info`: get package URLs for source code, documentation, issues and
     license.
 
-  - `plot`: output plot
+  - `plot`: plot the data in a window, or save it to `OUTPUT` (the format
+    is given by the file extension, e.g. `.png`)
 
-  - `print`: output data
+  - `print`: print the data, or save it to `OUTPUT` (`.csv` or `.csv.gz`)
 
-  - `register`: open the NSRDB registration form
+  - `register`: open the NSRDB registration form and show where to save
+    the credentials
 
-  - `viewer`: open Marimo notebook
+  - `viewer`: open the marimo weather viewer notebook
 
 Options
 -------
@@ -35,11 +37,26 @@ Options
   - `-o|--output OUTPUT`: output file name
 
   - `-S|--state STATE`: state abbreviation of county
+
+  - `-V|--variable VARIABLE[,...]`: comma-separated column(s) to print or
+    plot (default is all columns)
   
   - `-w|--warning`: enable warning messages from python
 
-  - `-Y|--year YEAR`: year of weather data to collect
-  
+  - `-Y|--year YEAR`: year of weather data to collect (default is the
+    reference weather)
+
+Exit codes
+----------
+
+  - `0`: success
+
+  - `1`: failure (a one-line `ERROR [weather]: ...` message is written to
+    stderr; use `--debug` for the traceback)
+
+  - `2`: syntax error
+
+`viewer` exits with the exit code of `marimo`.
 
 Description
 -----------
@@ -109,6 +126,15 @@ which outputs the following
 
     [8760 rows x 5 columns]
 
+Credentials
+-----------
+
+Reference weather needs no credentials. Actual weather (`-Y YEAR` or
+`year=YEAR`) is downloaded from the NSRDB and needs an NLR Developer Network
+API key: run `weather register`, then save the email and key in
+`~/.nsrdb/credentials.json` as `{"YOUR.EMAIL@EXAMPLE.COM": "YOUR_TOKEN"}`.
+See `weather.weather` for details, the data sources, and the cache.
+
 What is not promised
 --------------------
 
@@ -117,7 +143,9 @@ What is not promised
     reference weather); it is not an area average.
 
   - Reference weather is the COMstock 2018 actual meteorological year only;
-    the `year` argument selects NSRDB actual weather instead.
+    the `year` argument selects NSRDB actual weather instead, for the years
+    the NSRDB GOES Aggregated v4 dataset covers (1998 to 2024 when this was
+    written).
 
   - Values are taken from the sources as published, converted and rounded;
     no gap filling, quality control, or cross-check between the reference

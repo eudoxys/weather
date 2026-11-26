@@ -41,6 +41,7 @@ Update this file in the same PR that adds, moves, or deletes a file.
 | `weather/_test/test_reference.py` | reference weather | covers `weather.py` (no year) |
 | `weather/_test/test_nsrdb.py` | NSRDB actual weather, mocked | covers `weather.py` (year) |
 | `weather/_test/test_cache.py` | cache read/write/refresh/archive | covers `weather.py` |
+| `weather/_test/test_credentials.py` | NSRDB credentials file handling, import without `HOME` | covers `nsrdb_credentials()`, `credentials_path()` in `weather.py` |
 | `weather/_test/test_cli.py` | CLI commands and exit codes | covers `cli.py` |
 | `weather/_test/test_live.py` | one real NSRDB download | marked `network`, `live`; skipped without credentials |
 

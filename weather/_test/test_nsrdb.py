@@ -59,3 +59,18 @@ def test_download_failure(nsrdb, monkeypatch):
     with pytest.raises(RuntimeError, match="NSRDB weather download") as err:
         Weather("CA", "Alameda", year=2019)
     assert isinstance(err.value.__cause__, ConnectionError)
+
+def test_empty_data(monkeypatch):
+    import weather.weather as ww
+    monkeypatch.setattr(ww, "nsrdb_weather", lambda *a, **k: pd.DataFrame())
+    with pytest.raises(RuntimeError, match="NSRDB weather download") as err:
+        Weather("CA", "Alameda", year=2019)
+    assert "no weather data found" in str(err.value)
+
+def test_missing_column(nsrdb, monkeypatch):
+    import weather.weather as ww
+    original = ww.nsrdb_weather
+    monkeypatch.setattr(ww, "nsrdb_weather",
+        lambda *a, **k: original(*a, **k).drop(columns=["dhi"]))
+    with pytest.raises(RuntimeError, match=r"missing column\(s\) \['dhi'\]"):
+        Weather("CA", "Alameda", year=2019)
